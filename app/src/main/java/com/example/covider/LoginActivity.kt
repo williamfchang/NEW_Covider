@@ -7,19 +7,14 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 import kotlinx.coroutines.*
 
-import io.realm.mongodb.App
-import io.realm.mongodb.AppConfiguration
-import io.realm.mongodb.AppException
-import io.realm.mongodb.Credentials
-
 
 /* THIS IS ADAPTED FROM MONGODB TUTORIAL: https://www.mongodb.com/docs/realm/tutorial/java-sdk */
-
-
-lateinit var coviderApp: App
 
 inline fun <reified T> T.TAG(): String = T::class.java.simpleName
 
@@ -33,6 +28,8 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var loginButton: Button
     private lateinit var createUserButton: Button
 
+    private lateinit var auth: FirebaseAuth
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -44,9 +41,17 @@ class LoginActivity : AppCompatActivity() {
         loginButton.setOnClickListener { login(false) }
         createUserButton.setOnClickListener { login(true) }
 
-        // initialize app
-        // TODO: move this to MainActivity once we have login as a popup instead of start page
-        coviderApp = App.create(AppConfiguration.Builder(BuildConfig.MONGODB_REALM_APP_ID).build())
+        // Initialize Firebase Auth
+        auth = Firebase.auth
+    }
+
+    public override fun onStart() {
+        super.onStart()
+        // Check if user is signed in (non-null) and update UI accordingly.
+        val currentUser = auth.currentUser
+        if(currentUser != null){
+            onLoginSuccess()
+        }
     }
 
     override fun onBackPressed() {
@@ -90,44 +95,45 @@ class LoginActivity : AppCompatActivity() {
         val password = this.password.text.toString()
 
         if (createUser) {
-            // register a user using the Realm App we created in the TaskTracker class
-            // TODO: change this comment when we move the realm app creation
-            try {
-                runBlocking {
-                    coviderApp.emailPasswordAuth.registerUser(username, password)
+
+            auth.createUserWithEmailAndPassword(username, password)
+                .addOnCompleteListener(this) { task ->
+
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG(), "createUserWithEmail:success")
+//                        val user = auth.currentUser
+                        login(false)
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG(), "createUserWithEmail:failure", task.exception)
+                        Toast.makeText(baseContext, "Authentication failed.",
+                            Toast.LENGTH_SHORT).show()
+
+                        createUserButton.isEnabled = true
+                        loginButton.isEnabled = true
+                    }
                 }
 
-                // successfully registered
-                Log.i(TAG(), "Successfully registered user.")
-                login(false)
-            }
-            catch (e: AppException) {
-                // failure to register
-                onLoginFailed("Could not register user.")
-                Log.e(TAG(), "Error: $e")
-            }
-            finally {
-                // re-enable the buttons after user registration returns a result
-                createUserButton.isEnabled = true
-                loginButton.isEnabled = true
-            }
         }
-        else {
-            val creds = Credentials.emailPassword(username, password)
+        else{
+            auth.signInWithEmailAndPassword(username, password)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG(), "signInWithEmail:success")
+//                        val user = auth.currentUser
+                        onLoginSuccess()
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG(), "signInWithEmail:failure", task.exception)
+                        Toast.makeText(baseContext, "Authentication failed.",
+                            Toast.LENGTH_SHORT).show()
 
-            try {
-                runBlocking {
-                    coviderApp.login(creds)
+                        createUserButton.isEnabled = true
+                        loginButton.isEnabled = true
+                    }
                 }
-
-                onLoginSuccess()
-            } catch (e: AppException) {
-                onLoginFailed(e.toString())
-            } finally {
-                // re-enable the buttons after user login returns a result
-                createUserButton.isEnabled = true
-                loginButton.isEnabled = true
-            }
         }
     }
 }
