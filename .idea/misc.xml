@@ -22,12 +22,13 @@
         <entry key="app/src/main/res/layout/fragment_maps.xml" value="0.29347826086956524" />
         <entry key="app/src/main/res/layout/fragment_notifications.xml" value="0.12771739130434784" />
         <entry key="app/src/main/res/layout/fragment_reports_list.xml" value="0.19375" />
-        <entry key="app/src/main/res/layout/fragment_visit.xml" value="0.29347826086956524" />
+        <entry key="app/src/main/res/layout/fragment_visit.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_visit_list.xml" value="0.29347826086956524" />
         <entry key="app/src/main/res/layout/fragment_visit_lists.xml" value="0.29347826086956524" />
         <entry key="app/src/main/res/layout/fragment_visits.xml" value="0.19375" />
         <entry key="app/src/main/res/layout/fragment_visits_list.xml" value="0.19375" />
         <entry key="app/src/main/res/menu/bottom_nav_menu.xml" value="0.1" />
+        <entry key="app/src/main/res/xml/root_preferences.xml" value="0.2793609619140625" />
       </map>
     </option>
   </component>

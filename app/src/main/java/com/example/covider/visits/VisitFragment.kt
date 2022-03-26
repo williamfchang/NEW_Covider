@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.covider.R
-import com.example.covider.visits.placeholder.PlaceholderContent
 
 /**
  * A fragment representing a list of Items.
@@ -37,7 +36,7 @@ class VisitFragment : Fragment() {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                adapter = VisitRecyclerViewAdapter(PlaceholderContent.ITEMS)
+                adapter = VisitRecyclerViewAdapter(VisitList.visits)
             }
         }
         return view
