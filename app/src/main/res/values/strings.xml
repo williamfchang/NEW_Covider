@@ -1,11 +1,33 @@
 <resources>
     <string name="app_name">Covider</string>
+    <string name="title_map">Map</string>
+    <string name="title_visits">Visits</string>
+    <string name="title_health_check">Health Check</string>
+    <string name="title_settings">Settings</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
 
+    <string name="name">Name</string>
+    <string name="phone_number">Phone Number</string>
     <string name="username">Email</string>
     <string name="password">Password</string>
     <string name="create_account">Create account</string>
     <string name="login">Login</string>
+    <string name="have_account">Have an account?</string>
+    <string name="need_account">Need an account?</string>
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
 </resources>
