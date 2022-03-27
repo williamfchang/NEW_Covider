@@ -25,7 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/name"
-                android:inputType="text" />
+                android:inputType="textPersonName|text" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -35,11 +35,11 @@
             android:layout_marginBottom="8dp">
 
             <EditText
-                android:id="@+id/input_phone_number"
+                android:id="@+id/input_usc_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/phone_number"
-                android:inputType="textPassword" />
+                android:hint="@string/usc_id"
+                android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -49,11 +49,11 @@
             android:layout_marginBottom="8dp">
 
             <EditText
-                android:id="@+id/input_username"
+                android:id="@+id/input_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/username"
-                android:inputType="text" />
+                android:inputType="textWebEmailAddress|textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -70,8 +70,15 @@
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <Switch
+            android:id="@+id/switch_instructor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/instructor_switch_text" />
+
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/button_login"
+            android:id="@+id/button_create"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
@@ -92,7 +99,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/button_create"
+                android:id="@+id/button_login"
                 android:layout_width="48dp"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="0dp"

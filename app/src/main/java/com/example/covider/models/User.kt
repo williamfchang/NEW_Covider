@@ -1,7 +1,8 @@
 package com.example.covider.models
 
-class User(var name:String, var email: String, var phoneNumber: String)
+open class User(var name:String, var email: String, var uscID: String)
 {
+
     public fun reportUserHealthStat(){
 
     }
