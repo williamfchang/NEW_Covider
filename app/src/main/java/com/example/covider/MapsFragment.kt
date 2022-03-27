@@ -12,19 +12,19 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 
+// Move firebase stuff to DatabaseService later
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.GeoPoint
+
 
 class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 
-    // member vars
-    private val buildings = arrayOf(
-        Building("Tutor Campus Center", LatLng(34.020473494587414, -118.2863610986055)),
-        Building("Grace Ford Salvatori Hall", LatLng(34.02145610419585, -118.2879972637911),
-            minZoom = 17.0f),
-        Building("Leavey Library", LatLng(34.02178321140542, -118.28284243164403),
-            isFavorite = true, minZoom = 16.0f)
-    )
-    private var buildingMarkers = ArrayList<Marker>()
+    // Firestore
+    val db = Firebase.firestore
 
+    // member vars
+    private var buildingMarkers = ArrayList<Marker>()
 
     private val callback = OnMapReadyCallback { map ->
         /**
@@ -44,24 +44,8 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
         map.setLatLngBoundsForCameraTarget(uscBounds)
         map.setMinZoomPreference(14.0f)
 
-        // Draw markers at each building
-        for (b in buildings) {
-            // get icon color based on favorited
-            val hue = if (b.isFavorite) BitmapDescriptorFactory.HUE_YELLOW
-                        else BitmapDescriptorFactory.HUE_RED
-            val customIcon = BitmapDescriptorFactory.defaultMarker(hue)
-
-            // create marker
-            val marker = map.addMarker(MarkerOptions().position(b.coords)
-                .title(b.name).snippet("Click for more info")
-                .icon(customIcon))
-
-            if (marker != null) {
-                marker.tag = b // set data tag of marker to corresponding building object
-                buildingMarkers.add(marker)
-            }
-        }
-        updateMarkersOnZoom(map) // an initial update for current zoom
+        // Draw buildings on map
+        getAndDrawBuildings(map)
 
         // Set listener to zoom so we can draw markers based on zoom
         map.setOnCameraMoveListener { updateMarkersOnZoom(map) }
@@ -84,6 +68,7 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
         mapFragment?.getMapAsync(callback)
     }
 
+    // -- map interaction -- //
     override fun onInfoWindowClick(marker: Marker) {
         Toast.makeText(
             activity, "info window of ${marker.title} clicked",
@@ -96,7 +81,70 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
             marker.isVisible = map.cameraPosition.zoom >= (marker.tag as Building).minZoom
         }
     }
+
+    // -- helper functions -- //
+    private fun getAndDrawBuildings(map: GoogleMap) {
+        val buildings = ArrayList<Building>()
+
+        // pull buildings from Firebase
+        db.collection("buildings").get()
+            .addOnSuccessListener { result ->
+
+                // loop through all buildings
+                for (doc in result) {
+                    // get data fields
+                    val data = doc.data
+
+                    val name = data["name"] as String
+                    val coordAsGP = data["coordinates"] as GeoPoint
+                    val coords = LatLng(coordAsGP.latitude, coordAsGP.longitude)
+                    val address = when {
+                        data.containsKey("address") -> data["address"] as String
+                        else -> "N/A"
+                    }
+
+                    // create new building for array
+                    buildings.add(Building(doc.id, name, coords, address))
+                }
+
+                Log.i(TAG(), "Successfully created ${buildings.size} buildings")
+
+                // Now draw buildings on map
+                drawBuildingMarkers(map, buildings.toTypedArray())
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG(), "Error getting buildings.", exception)
+            }
+    }
+
+    private fun drawBuildingMarkers(map: GoogleMap, buildings: Array<Building>) {
+        // draw each building
+        for (b in buildings) {
+            // get icon color based on favorited
+            val hue = if (b.isFavorite) BitmapDescriptorFactory.HUE_YELLOW
+            else BitmapDescriptorFactory.HUE_RED
+            val customIcon = BitmapDescriptorFactory.defaultMarker(hue)
+
+            // create marker
+            val marker = map.addMarker(MarkerOptions().position(b.coordinates)
+                .title(b.name).snippet("Click for more info")
+                .icon(customIcon))
+
+            if (marker != null) {
+                marker.tag = b // set data tag of marker to corresponding building object
+                buildingMarkers.add(marker)
+
+                Log.i(TAG(), "Coordinates for ${b.id}: ${b.coordinates}")
+            }
+        }
+        updateMarkersOnZoom(map) // update for the zoom
+    }
 }
 
 
-class Building(val name: String, val coords: LatLng, val isFavorite: Boolean=false, var minZoom: Float=14.0f)
+class Building(val id: String,
+               val name: String,
+               val coordinates: LatLng,
+               val address: String="N/A",
+               val isFavorite: Boolean=false,
+               var minZoom: Float=14.0f)
