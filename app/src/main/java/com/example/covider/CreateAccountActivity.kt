@@ -19,10 +19,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 
 class CreateAccountActivity : AppCompatActivity() {
-    private lateinit var name: TextInputEditText
-    private lateinit var uscID: TextInputEditText
-    private lateinit var email: TextInputEditText
-    private lateinit var password: TextInputEditText
+    private lateinit var name: EditText
+    private lateinit var uscID: EditText
+    private lateinit var email: EditText
+    private lateinit var password: EditText
     private lateinit var gotoLoginButton: Button
     private lateinit var createUserButton: Button
     private lateinit var instructorSwitch: Switch
