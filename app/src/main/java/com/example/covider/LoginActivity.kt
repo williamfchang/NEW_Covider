@@ -11,8 +11,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
-import kotlinx.coroutines.*
-
 
 /* THIS IS ADAPTED FROM MONGODB TUTORIAL: https://www.mongodb.com/docs/realm/tutorial/java-sdk */
 
@@ -26,20 +24,23 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var username: EditText
     private lateinit var password: EditText
     private lateinit var loginButton: Button
-    private lateinit var createUserButton: Button
+    private lateinit var gotoCreateAccountButton: Button
 
     private lateinit var auth: FirebaseAuth
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        username = findViewById(R.id.input_username)
+        username = findViewById(R.id.input_email)
         password = findViewById(R.id.input_password)
-        loginButton = findViewById(R.id.button_login)
-        createUserButton = findViewById(R.id.button_create)
+        loginButton = findViewById(R.id.button_create)
+        gotoCreateAccountButton = findViewById(R.id.button_login)
 
-        loginButton.setOnClickListener { login(false) }
-        createUserButton.setOnClickListener { login(true) }
+        loginButton.setOnClickListener { login() }
+        gotoCreateAccountButton.setOnClickListener {
+            val intent = Intent(this, CreateAccountActivity::class.java)
+            startActivity(intent)
+        }
 
         // Initialize Firebase Auth
         auth = Firebase.auth
@@ -49,9 +50,9 @@ class LoginActivity : AppCompatActivity() {
         super.onStart()
         // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
-//        if(currentUser != null){
+        if(currentUser != null){
             onLoginSuccess()
-//        }
+        }
     }
 
     override fun onBackPressed() {
@@ -61,7 +62,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun onLoginSuccess() {
         // successful login ends this activity, bringing the user back to the project activity
-//        finish()
+        // finish()
 
         // temporarily go to main activity
         val intent = Intent(this, MainActivity::class.java)
@@ -81,59 +82,30 @@ class LoginActivity : AppCompatActivity() {
     }
 
     // handle user authentication (login) and account creation
-    private fun login(createUser: Boolean) {
+    private fun login() {
         if (!validateCredentials()) {
             onLoginFailed("Invalid username or password")
             return
         }
 
         // while this operation completes, disable the buttons to login or create a new account
-        createUserButton.isEnabled = false
+        gotoCreateAccountButton.isEnabled = false
         loginButton.isEnabled = false
 
         val username = this.username.text.toString()
         val password = this.password.text.toString()
 
-        if (createUser) {
-
-            auth.createUserWithEmailAndPassword(username, password)
-                .addOnCompleteListener(this) { task ->
-
-                    if (task.isSuccessful) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d(TAG(), "createUserWithEmail:success")
-//                        val user = auth.currentUser
-                        login(false)
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        Log.w(TAG(), "createUserWithEmail:failure", task.exception)
-                        Toast.makeText(baseContext, "Authentication failed.",
-                            Toast.LENGTH_SHORT).show()
-
-                        createUserButton.isEnabled = true
-                        loginButton.isEnabled = true
-                    }
+        auth.signInWithEmailAndPassword(username, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    Log.d(TAG(), "signInWithEmail:success")
+                    onLoginSuccess()
+                } else {
+                    // If sign in fails, display a message to the user.
+                    onLoginFailed("Login failed")
+                    gotoCreateAccountButton.isEnabled = true
+                    loginButton.isEnabled = true
                 }
-
-        }
-        else{
-            auth.signInWithEmailAndPassword(username, password)
-                .addOnCompleteListener(this) { task ->
-                    if (task.isSuccessful) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d(TAG(), "signInWithEmail:success")
-//                        val user = auth.currentUser
-                        onLoginSuccess()
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        Log.w(TAG(), "signInWithEmail:failure", task.exception)
-                        Toast.makeText(baseContext, "Authentication failed.",
-                            Toast.LENGTH_SHORT).show()
-
-                        createUserButton.isEnabled = true
-                        loginButton.isEnabled = true
-                    }
-                }
-        }
+            }
     }
 }

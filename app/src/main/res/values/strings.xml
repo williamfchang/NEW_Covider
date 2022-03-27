@@ -14,6 +14,7 @@
     <string name="password">Password</string>
     <string name="create_account">Create account</string>
     <string name="login">Login</string>
+    <string name="usc_id">USC ID</string>
     <string name="have_account">Have an account?</string>
     <string name="need_account">Need an account?</string>
     <!-- Preference Titles -->
@@ -30,4 +31,5 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="instructor_switch_text">I am an Instructor at USC</string>
 </resources>

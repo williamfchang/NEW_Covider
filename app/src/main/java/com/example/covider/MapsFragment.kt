@@ -1,14 +1,11 @@
 package com.example.covider
 
-import androidx.fragment.app.Fragment
-
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-
+import androidx.fragment.app.Fragment
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -40,7 +37,10 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
             LatLng(34.016779, -118.293452), // southwest corner
             LatLng(34.027559, -118.277238) // northeast corner
         )
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(uscBounds, 0))
+        val width = resources.displayMetrics.widthPixels
+        val height = resources.displayMetrics.heightPixels
+        val padding = 0
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(uscBounds, width, height, padding))
         map.setLatLngBoundsForCameraTarget(uscBounds)
         map.setMinZoomPreference(14.0f)
 
