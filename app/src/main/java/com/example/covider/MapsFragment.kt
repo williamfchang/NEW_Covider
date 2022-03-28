@@ -7,6 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.google.common.primitives.UnsignedBytes.toInt
+
+import com.example.covider.models.Building
+
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -26,6 +30,7 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 
     // member vars
     private var buildingMarkers = ArrayList<Marker>()
+    private val priority1MinZoom = 16.5
 
     private val callback = OnMapReadyCallback { map ->
         /**
@@ -81,7 +86,13 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 
     private fun updateMarkersOnZoom(map: GoogleMap) {
         for (marker in buildingMarkers) {
-            marker.isVisible = map.cameraPosition.zoom >= (marker.tag as Building).minZoom
+            // priority 2 and 3 always shown. priority 1 only if greater than constant
+            val building = marker.tag as Building
+            marker.isVisible = when (building.priority) {
+                2, 3 -> true
+                1 -> map.cameraPosition.zoom >= priority1MinZoom
+                else -> false
+            }
         }
     }
 
@@ -105,10 +116,10 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
                         data.containsKey("address") -> data["address"] as String
                         else -> "N/A"
                     }
-                    val show = data["show"] as Boolean
+                    val priority = (data["priority"] as Long).toInt()
 
                     // create new building for array
-                    buildings.add(Building(doc.id, name, coords, address, show))
+                    buildings.add(Building(doc.id, name, coords, address, priority))
                 }
 
                 Log.i(TAG(), "Successfully created ${buildings.size} buildings")
@@ -124,11 +135,13 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
     private fun drawBuildingMarkers(map: GoogleMap, buildings: Array<Building>) {
         // draw each building that has show as true
         for (b in buildings) {
-            if (!b.show) continue // skip buildings that are hidden
+            if (b.priority == 0) continue // skip buildings that are hidden
 
-            // get icon color based on favorited
-            val hue = if (b.isFavorite) BitmapDescriptorFactory.HUE_YELLOW
-            else BitmapDescriptorFactory.HUE_RED
+            // get icon color based on priority (2 = favorited)
+            val hue = when (b.priority) {
+                3 -> BitmapDescriptorFactory.HUE_YELLOW
+                else -> BitmapDescriptorFactory.HUE_RED
+            }
             val customIcon = BitmapDescriptorFactory.defaultMarker(hue)
 
             // create marker
@@ -140,18 +153,9 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
                 marker.tag = b // set data tag of marker to corresponding building object
                 buildingMarkers.add(marker)
 
-                Log.i(TAG(), "Coordinates for ${b.id}: ${b.coordinates}")
+//                Log.i(TAG(), "Coordinates for ${b.id}: ${b.coordinates}")
             }
         }
         updateMarkersOnZoom(map) // update for the zoom
     }
 }
-
-
-class Building(val id: String,
-               val name: String,
-               val coordinates: LatLng,
-               val address: String = "N/A",
-               val show: Boolean = false,
-               val isFavorite: Boolean = false,
-               var minZoom: Float=14.0f)
