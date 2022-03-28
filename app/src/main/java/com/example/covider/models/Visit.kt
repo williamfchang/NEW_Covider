@@ -1,5 +1,12 @@
 package com.example.covider.models
 
-open class Visit(var startTime: Int = 0, var endTime: Int = 0, var buildingID: String) {
+import com.google.firebase.Timestamp
+import java.sql.Time
 
-}
+data class Visit(
+    var startTime: Timestamp? = null,
+    var endTime: Timestamp? = null,
+    var buildingID: String? = null,
+    var userID: String? = null,
+    var userWasPositive: Boolean? = null
+)
