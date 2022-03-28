@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="15dp">
+
+    <TextView
+        android:id="@+id/symptomsTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="@string/symptoms_header"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+    <CheckBox
+        android:id="@+id/checkbox_chills_or_fever"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSymptomCheckboxClicked"
+        android:text="@string/chills_or_fever" />
+
+    <CheckBox
+        android:id="@+id/checkbox_taste_or_smell"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSymptomCheckboxClicked"
+        android:text="@string/taste_or_smell" />
+
+    <CheckBox
+        android:id="@+id/checkbox_soreness_headaches_fatigue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSymptomCheckboxClicked"
+        android:text="@string/soreness_headaches_fatigue" />
+
+    <CheckBox
+        android:id="@+id/checkbox_cough_nose_throat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSymptomCheckboxClicked"
+        android:text="@string/cough_nose_throat" />
+
+    <CheckBox
+        android:id="@+id/checkbox_breathing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSymptomCheckboxClicked"
+        android:text="@string/breathing" />
+
+    <CheckBox
+        android:id="@+id/checkbox_conjunctivitis"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSymptomCheckboxClicked"
+        android:text="@string/conjunctivitis" />
+
+    <CheckBox
+        android:id="@+id/checkbox_gi_symptoms"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSymptomCheckboxClicked"
+        android:text="@string/gi_symptoms" />
+
+    <TextView
+        android:id="@+id/testResultTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="@string/test_results_header"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+    <CheckBox
+        android:id="@+id/checkbox_positive_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onTestResultCheckboxClicked"
+        android:text="@string/positive_result" />
+
+    <TextView
+        android:id="@+id/submitTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="@string/submit_header"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+    <CheckBox
+        android:id="@+id/checkbox_verify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onVerifyCheckboxClicked"
+        android:text="@string/verify_attestation" />
+
+    <Button
+        android:id="@+id/submit_attestation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:onClick="onSubmit"
+        android:text="@string/submit_button"
+        android:enabled="false" />
+
+    </LinearLayout>
+</ScrollView>

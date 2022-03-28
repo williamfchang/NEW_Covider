@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Covider</string>
+    <string name="title_login">Covider Login</string>
+    <string name="title_create_account">Create Account</string>
     <string name="title_map">Map</string>
     <string name="title_visits">Visits</string>
     <string name="title_health_check">Health Check</string>
@@ -52,4 +54,24 @@
     <string name="text_courses">Courses</string>
     <string name="text_health_reports">Health Reports</string>
     <string name="text_instructor">"Instructor: "</string>
+
+    <!-- Attestation Form -->
+    <string name="symptoms_header">Symptoms</string>
+    <string name="test_results_header">Test Result</string>
+    <string name="submit_header">Verify</string>
+    <string name="submit_button">Submit</string>
+
+    <string name="chills_or_fever">Chills or Fever of 100 degrees or higher</string>
+    <string name="taste_or_smell">Loss of Taste or Smell</string>
+    <string name="soreness_headaches_fatigue">Muscle Soreness or Headaches or Fatigue</string>
+    <string name="cough_nose_throat">Cough or Runny Nose or Sore Throat or Congestion</string>
+    <string name="breathing">Difficulty Breathing or Shortness of Breath</string>
+    <string name="conjunctivitis">Conjunctivitis (inflammation of eye including redness, itching and tearing) ALONG WITH feeling feverish</string>
+    <string name="gi_symptoms">GI symptoms such as Abdominal Pain or Diarrhea or Nausea or Vomiting</string>
+
+    <string name="positive_result">I received a positive test result</string>
+    <string name="verify_attestation">I attest that my answer to the above wellness assessment questions are accurate</string>
+
+
+
 </resources>

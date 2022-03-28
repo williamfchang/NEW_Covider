@@ -52,10 +52,10 @@ class ProfileFragment : Fragment() {
         addHealthReportButton = view.findViewById(R.id.button_upload_health_reports)
         loginButton = view.findViewById(R.id.button_profile_login)
 
-//        addHealthReportButton.setOnClickListener {
-//            val intent = Intent(activity, HealthReportActivity::class.java)
-//            startActivity(intent)
-//        }
+        addHealthReportButton.setOnClickListener {
+            val intent = Intent(activity, HealthReportActivity::class.java)
+            startActivity(intent)
+        }
 
         loginButton.setOnClickListener {
             val intent = Intent(activity, LoginActivity::class.java)
