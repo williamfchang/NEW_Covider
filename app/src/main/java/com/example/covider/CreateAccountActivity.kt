@@ -88,7 +88,7 @@ class CreateAccountActivity : AppCompatActivity() {
     private fun validateInstructor(id:String): Boolean{
         // check instructor id with usc database
         // ensure there isn't already
-        Log.e(TAG(), id)
+        Log.d(TAG(), id)
         return true
     }
 

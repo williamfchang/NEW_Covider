@@ -11,18 +11,16 @@
         android:label="@string/title_map"
         tools:layout="@layout/fragment_maps" />
 
-
     <fragment
         android:id="@+id/navigation_visits"
         android:name="com.example.covider.visits.VisitsFragment"
         android:label="@string/title_visits"
         tools:layout="@layout/fragment_visits" />
 
-
     <fragment
         android:id="@+id/navigation_settings"
-        android:name="com.example.covider.SettingsFragment"
-        android:label="@string/title_settings" />
+        android:name="com.example.covider.ProfileFragment"
+        android:label="@string/title_profile" />
 
 
 </navigation>

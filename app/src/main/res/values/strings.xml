@@ -7,6 +7,7 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="title_profile">Profile</string>
 
     <string name="name">Name</string>
     <string name="phone_number">Phone Number</string>
@@ -46,4 +47,9 @@
     <string name="instructor_switch_text">I am an Instructor at USC</string>
     <string name="title_activity_building_info">Building Info</string>
 
+    <string name="text_email">Email: </string>
+    <string name="text_usc_id">USC ID: </string>
+    <string name="text_courses">Courses</string>
+    <string name="text_health_reports">Health Reports</string>
+    <string name="text_instructor">"Instructor: "</string>
 </resources>
