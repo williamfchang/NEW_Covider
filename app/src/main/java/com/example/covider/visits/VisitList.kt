@@ -1,5 +1,6 @@
 package com.example.covider.visits
 
+import com.example.covider.models.Visit
 import java.util.ArrayList
 
 object VisitList {
@@ -17,27 +18,5 @@ object VisitList {
 
     private fun createPlaceholderVisit(position: Int): Visit {
         return Visit(position, position+10, "building name")
-    }
-}
-
-class Visit {
-    private var startTime = 0 //
-    private var endTime = 0
-    private var buildingID = ""
-
-    constructor(startTime: Int, endTime: Int, buildingID: String) {
-        this.startTime = startTime
-        this.endTime = endTime
-        this.buildingID = buildingID
-    }
-
-    fun getStartTime(): Int {
-        return startTime
-    }
-    fun getEndTime(): Int {
-        return endTime
-    }
-    fun getBuilding(): String {
-        return buildingID
     }
 }
