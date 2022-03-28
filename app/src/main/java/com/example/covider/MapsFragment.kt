@@ -1,10 +1,12 @@
 package com.example.covider
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.common.primitives.UnsignedBytes.toInt
@@ -31,6 +33,7 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
     // member vars
     private var buildingMarkers = ArrayList<Marker>()
     private val priority1MinZoom = 16.5
+    private lateinit var listButton: Button
 
     private val callback = OnMapReadyCallback { map ->
         /**
@@ -65,7 +68,14 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_maps, container, false)
+        val view = inflater.inflate(R.layout.fragment_maps, container, false)
+        listButton = view.findViewById(R.id.button_building_list) // change
+        listButton.setOnClickListener {
+            val intent = Intent(this.context, BuildingsActivity::class.java)
+            startActivity(intent)
+        }
+
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

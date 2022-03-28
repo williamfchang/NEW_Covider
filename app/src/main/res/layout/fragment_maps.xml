@@ -12,7 +12,7 @@
         tools:context=".MapsFragment" />
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/button_building_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#359c5e"
@@ -20,7 +20,7 @@
         android:layout_alignParentEnd="true"
         android:padding="8dp"
         android:layout_margin="5dp"
-        android:text="Hello there"
+        android:text="@string/see_list"
         android:textColor="#ffffff" />
 
 </RelativeLayout>

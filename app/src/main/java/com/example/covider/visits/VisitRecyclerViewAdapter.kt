@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 
 import com.example.covider.databinding.FragmentVisitBinding
+import com.example.covider.models.Visit
 
 class VisitRecyclerViewAdapter(
         private val values: List<Visit>)
@@ -19,9 +20,9 @@ class VisitRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = values[position]
-        holder.idView.text = item.getStartTime().toString() + " to " +
-                item.getEndTime().toString()
-        holder.contentView.text = item.getBuilding()
+        holder.idView.text = item.startTime.toString() + " to " +
+                item.endTime.toString()
+        holder.contentView.text = item.buildingID
     }
 
     override fun getItemCount(): Int = values.size

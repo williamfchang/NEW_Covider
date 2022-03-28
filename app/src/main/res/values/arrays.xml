@@ -9,4 +9,58 @@
         <item>reply</item>
         <item>reply_all</item>
     </string-array>
+
+    <string-array name="Buildings">
+        <item>ACB</item>
+        <item>ACC</item>
+        <item>ANN</item>
+        <item>ASC</item>
+        <item>BHE</item>
+        <item>BIT</item>
+        <item>BKS</item>
+        <item>CPA</item>
+        <item>DML</item>
+        <item>DRC</item>
+        <item>ESH</item>
+        <item>GER</item>
+        <item>GFS</item>
+        <item>IYH</item>
+        <item>JFF</item>
+        <item>JHH</item>
+        <item>JKP</item>
+        <item>KAP</item>
+        <item>KDC</item>
+        <item>LAW</item>
+        <item>LJS</item>
+        <item>LRC</item>
+        <item>LVL</item>
+        <item>MCB</item>
+        <item>MCC</item>
+        <item>MHP</item>
+        <item>NCT</item>
+        <item>OHE</item>
+        <item>PED</item>
+        <item>PHE</item>
+        <item>RGL</item>
+        <item>RHM</item>
+        <item>RRI</item>
+        <item>RTH</item>
+        <item>RZC</item>
+        <item>SAL</item>
+        <item>SCA</item>
+        <item>SCB</item>
+        <item>SCC</item>
+        <item>SGM</item>
+        <item>SKS</item>
+        <item>SLH</item>
+        <item>SOS</item>
+        <item>STO</item>
+        <item>TCC</item>
+        <item>THH</item>
+        <item>TMC</item>
+        <item>UAC</item>
+        <item>UGW</item>
+        <item>VHE</item>
+    </string-array>
+
 </resources>

@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.Button
+import com.example.covider.BuildingsActivity
 import com.example.covider.R
 
 /**
@@ -46,6 +48,7 @@ class VisitsFragment : Fragment() {
             }
         }
 
+        addButton = view.findViewById(R.id.button_add_visit_page)
         addButton.setOnClickListener {
             val intent = Intent(this.context, AddVisitActivity::class.java)
             startActivity(intent)
