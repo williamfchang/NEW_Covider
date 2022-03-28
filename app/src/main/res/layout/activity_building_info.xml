@@ -23,13 +23,6 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             android:textSize="16sp" />
 
-        <Spinner
-            android:id="@+id/spinner_building"
-            android:layout_width="match_parent"
-            android:layout_height="34dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp" />
-
         <TextView
             android:id="@+id/start_time_label"
             android:layout_width="match_parent"
@@ -38,12 +31,6 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             android:textSize="16sp" />
 
-        <TimePicker
-            android:id="@+id/picker_start_time"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:timePickerMode="spinner"/>
 
         <TextView
             android:id="@+id/end_time_label"
@@ -53,29 +40,13 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             android:textSize="16sp" />
 
-        <TimePicker
-            android:id="@+id/picker_end_time"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:timePickerMode="spinner"/>
-
-        <Switch
-            android:id="@+id/switch_class"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/class_visit"
-            android:textSize="16sp" />
-
         <Button
-            android:id="@+id/button_add_visit"
+            android:id="@+id/button_add_building_visit"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:padding="12dp"
             android:layout_marginTop="12dp"
             android:text="@string/add_visit" />
-
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

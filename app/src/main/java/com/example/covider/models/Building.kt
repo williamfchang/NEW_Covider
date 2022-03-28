@@ -6,7 +6,9 @@ class Building(val id: String,
                val name: String,
                val coordinates: LatLng,
                val address: String = "N/A",
-               val priority: Int = 0)
+               val priority: Int = 0,
+               val risk: Int = 1000)
+
 
 // var minZoom: Float=14.0f
 

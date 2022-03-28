@@ -10,6 +10,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Covider">
         <activity
+            android:name=".BuildingInfoActivity"
+            android:label="@string/title_activity_building_info"
+            android:exported="false" />
+        <activity
             android:name=".BuildingsActivity"
             android:exported="false" />
 

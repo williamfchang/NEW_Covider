@@ -23,7 +23,7 @@ class BuildingsActivity : AppCompatActivity() {
         listView.adapter = adapter
         listView.setOnItemClickListener { adapterView, view, i, l ->
             // TODO: Want to open building info tab first, but do this for testing
-            val intent = Intent(this, AddVisitActivity::class.java)
+            val intent = Intent(this, BuildingInfoActivity::class.java)
             intent.putExtra("Building Index", i)
             startActivity(intent)
         }
