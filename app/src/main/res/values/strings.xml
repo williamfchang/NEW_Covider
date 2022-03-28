@@ -17,6 +17,13 @@
     <string name="usc_id">USC ID</string>
     <string name="have_account">Have an account?</string>
     <string name="need_account">Need an account?</string>
+    <string name="add_visit">Add a New Visit</string>
+    <string name="building">Building</string>
+    <string name="class_visit">Is this visit for a recurring class?</string>
+    <string name="select_building">Select Building</string>
+    <string name="select_start_time">Select a Start Time</string>
+    <string name="select_end_time">Select an End Time</string>
+
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>
