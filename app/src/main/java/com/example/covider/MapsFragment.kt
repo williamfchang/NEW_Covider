@@ -1,6 +1,7 @@
 package com.example.covider
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +22,7 @@ import com.google.firebase.firestore.GeoPoint
 class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 
     // Firestore
-    val db = Firebase.firestore
+    private val db = Firebase.firestore
 
     // member vars
     private var buildingMarkers = ArrayList<Marker>()
@@ -70,8 +71,10 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 
     // -- map interaction -- //
     override fun onInfoWindowClick(marker: Marker) {
+        val building = marker.tag as Building
+
         Toast.makeText(
-            activity, "info window of ${marker.title} clicked",
+            activity, "${building.id} @ ${building.address}",
             Toast.LENGTH_SHORT
         ).show()
     }
@@ -102,9 +105,10 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
                         data.containsKey("address") -> data["address"] as String
                         else -> "N/A"
                     }
+                    val show = data["show"] as Boolean
 
                     // create new building for array
-                    buildings.add(Building(doc.id, name, coords, address))
+                    buildings.add(Building(doc.id, name, coords, address, show))
                 }
 
                 Log.i(TAG(), "Successfully created ${buildings.size} buildings")
@@ -118,8 +122,10 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
     }
 
     private fun drawBuildingMarkers(map: GoogleMap, buildings: Array<Building>) {
-        // draw each building
+        // draw each building that has show as true
         for (b in buildings) {
+            if (!b.show) continue // skip buildings that are hidden
+
             // get icon color based on favorited
             val hue = if (b.isFavorite) BitmapDescriptorFactory.HUE_YELLOW
             else BitmapDescriptorFactory.HUE_RED
@@ -145,6 +151,7 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 class Building(val id: String,
                val name: String,
                val coordinates: LatLng,
-               val address: String="N/A",
-               val isFavorite: Boolean=false,
+               val address: String = "N/A",
+               val show: Boolean = false,
+               val isFavorite: Boolean = false,
                var minZoom: Float=14.0f)
