@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.*
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.ktx.toObject
 
 
 class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
@@ -31,7 +32,8 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
     private val db = Firebase.firestore
 
     // member vars
-    var buildingMarkers = ArrayList<Marker>() // public so buildings can be accessed elsewhere
+    var buildings = ArrayList<Building>()
+    private var buildingMarkers = ArrayList<Marker>() // public so buildings can be accessed elsewhere
     private val priority1MinZoom = 16.5
     private lateinit var listButton: Button
 
@@ -108,28 +110,12 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 
     // -- helper functions -- //
     private fun getAndDrawBuildings(map: GoogleMap) {
-        val buildings = ArrayList<Building>()
-
         // pull buildings from Firebase
-        db.collection("buildings").get()
+            db.collection("buildings").get()
             .addOnSuccessListener { result ->
-
-                // loop through all buildings
+                // loop through all building docs to create Building object
                 for (doc in result) {
-                    // get data fields
-                    val data = doc.data
-
-                    val name = data["name"] as String
-                    val coordAsGP = data["coordinates"] as GeoPoint
-                    val coords = LatLng(coordAsGP.latitude, coordAsGP.longitude)
-                    val address = when {
-                        data.containsKey("address") -> data["address"] as String
-                        else -> "N/A"
-                    }
-                    val priority = (data["priority"] as Long).toInt()
-
-                    // create new building for array
-                    buildings.add(Building(doc.id, name, coords, address, priority))
+                    buildings.add(doc.toObject<Building>())
                 }
 
                 Log.i(TAG(), "Successfully created ${buildings.size} buildings")
@@ -155,7 +141,7 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
             val customIcon = BitmapDescriptorFactory.defaultMarker(hue)
 
             // create marker
-            val marker = map.addMarker(MarkerOptions().position(b.coordinates)
+            val marker = map.addMarker(MarkerOptions().position(GeoPointToLatLng(b.coordinates!!))
                 .title(b.name).snippet("Click for more info")
                 .icon(customIcon))
 
@@ -163,10 +149,13 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
                 marker.tag = b // set data tag of marker to corresponding building object
                 marker.isVisible = false // set to false initially, so that we can enable a few
                 buildingMarkers.add(marker)
-
-//                Log.i(TAG(), "Coordinates for ${b.id}: ${b.coordinates}")
             }
         }
         updateMarkersOnZoom(map) // update for the zoom
+    }
+
+
+    private fun GeoPointToLatLng(gp: GeoPoint): LatLng {
+        return LatLng(gp.latitude, gp.longitude)
     }
 }
