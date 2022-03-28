@@ -7,6 +7,8 @@ import android.widget.TextView
 
 import com.example.covider.databinding.FragmentVisitBinding
 import com.example.covider.models.Visit
+import com.google.firebase.Timestamp
+import java.util.*
 
 class VisitRecyclerViewAdapter(
         private val values: List<Visit>)
@@ -20,9 +22,9 @@ class VisitRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = values[position]
-        holder.idView.text = item.startTime.toString() + " to " +
-                item.endTime.toString()
+        holder.idView.text = getTime(item.startTime!!) + "  to  " + getTime(item.endTime!!)
         holder.contentView.text = item.buildingID
+        // TODO: convert id to building name
     }
 
     override fun getItemCount(): Int = values.size
@@ -33,6 +35,17 @@ class VisitRecyclerViewAdapter(
 
         override fun toString(): String {
             return super.toString() + " '" + contentView.text + "'"
+        }
+    }
+
+    private fun getTime(ts: Timestamp): String {
+        val date = ts.toDate()
+        val hours = date.hours.toString()
+        val minutes = date.minutes.toString()
+        if (minutes.length < 2) {
+            return hours + ":0" + minutes
+        } else {
+            return hours + ":" + minutes
         }
     }
 

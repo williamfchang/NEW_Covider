@@ -43,6 +43,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
+            android:layout_marginTop="-20dp"
+            android:layout_marginBottom="-20dp"
             android:timePickerMode="spinner"/>
 
         <TextView
@@ -58,7 +60,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:timePickerMode="spinner"/>
+            android:layout_marginTop="-20dp"
+            android:layout_marginBottom="-20dp"
+            android:timePickerMode="spinner" />
 
         <Switch
             android:id="@+id/switch_class"
@@ -66,6 +70,28 @@
             android:layout_height="wrap_content"
             android:text="@string/class_visit"
             android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/input_course_code"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/class_code"
+            android:inputType="textEmailAddress" />
+
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="8dp"-->
+<!--            android:layout_marginBottom="8dp">-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/input_course_code"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:hint="@string/class_code"-->
+<!--                android:inputType="textEmailAddress" />-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
 
         <Button
             android:id="@+id/button_add_visit"

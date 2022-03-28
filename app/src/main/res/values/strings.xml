@@ -25,6 +25,7 @@
     <string name="add_visit_building">Add a visit to this building</string>
     <string name="building">Building</string>
     <string name="class_visit">Is this visit for a recurring class?</string>
+    <string name="class_code">Enter class code with format DEPT 123</string>
     <string name="select_building">Select Building</string>
     <string name="select_start_time">Select a Start Time</string>
     <string name="select_end_time">Select an End Time</string>
