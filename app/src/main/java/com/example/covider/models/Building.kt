@@ -10,8 +10,6 @@ class Building(val id: String,
                val risk: Int = 1000)
 
 
-// var minZoom: Float=14.0f
-
 
 /* Priority is defined as follows:
    0 -> not shown

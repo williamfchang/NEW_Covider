@@ -31,7 +31,7 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
     private val db = Firebase.firestore
 
     // member vars
-    public var buildingMarkers = ArrayList<Marker>()
+    var buildingMarkers = ArrayList<Marker>() // public so buildings can be accessed elsewhere
     private val priority1MinZoom = 16.5
     private lateinit var listButton: Button
 
@@ -161,6 +161,7 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 
             if (marker != null) {
                 marker.tag = b // set data tag of marker to corresponding building object
+                marker.isVisible = false // set to false initially, so that we can enable a few
                 buildingMarkers.add(marker)
 
 //                Log.i(TAG(), "Coordinates for ${b.id}: ${b.coordinates}")
