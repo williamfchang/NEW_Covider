@@ -13,7 +13,7 @@
         <entry key="app/src/main/res/drawable/ic_home_black_24dp.xml" value="0.14" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_notifications_black_24dp.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/activity_add_visit.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_add_visit.xml" value="0.165" />
         <entry key="app/src/main/res/layout/activity_building_info.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_buildings.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_create_account.xml" value="0.26319732666015627" />
@@ -25,6 +25,7 @@
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.12771739130434784" />
         <entry key="app/src/main/res/layout/fragment_maps.xml" value="0.29347826086956524" />
         <entry key="app/src/main/res/layout/fragment_notifications.xml" value="0.12771739130434784" />
+        <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.23333333333333334" />
         <entry key="app/src/main/res/layout/fragment_reports_list.xml" value="0.19375" />
         <entry key="app/src/main/res/layout/fragment_visit.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_visit_list.xml" value="0.25173339843750003" />

@@ -7,16 +7,8 @@ object VisitList {
 
     // TODO: need some way to order this list
     val visits: MutableList<Visit> = ArrayList()
-    private val count = 18
 
-    init {
-        // Add some sample items
-        for (i in 1..count) {
-            visits.add(createPlaceholderVisit(i))
-        }
-    }
-
-    private fun createPlaceholderVisit(position: Int): Visit {
-        return Visit(position, position+10, "building name")
+    fun addVisit(visit: Visit) {
+        visits.add(visit)
     }
 }
