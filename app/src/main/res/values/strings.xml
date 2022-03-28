@@ -17,13 +17,17 @@
     <string name="usc_id">USC ID</string>
     <string name="have_account">Have an account?</string>
     <string name="need_account">Need an account?</string>
-    <string name="add_visit">Add a New Visit</string>
+    <string name="add_new_visit">Add a New Visit</string>
+    <string name="add_visit">Add Visit</string>
+    <string name="add_visit_building">Add a visit to this building</string>
     <string name="building">Building</string>
     <string name="class_visit">Is this visit for a recurring class?</string>
     <string name="select_building">Select Building</string>
     <string name="select_start_time">Select a Start Time</string>
     <string name="select_end_time">Select an End Time</string>
     <string name="see_list">See List of Buildings</string>
+    <string name="risk_level">Risk Level</string>
+    <string name="entry_requirements">Entry Requirements</string>
 
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>

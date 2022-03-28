@@ -16,28 +16,63 @@
         tools:layout_editor_absoluteY="0dp">
 
         <TextView
-            android:id="@+id/building_label"
+            android:id="@+id/building_code_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/select_building"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/building_name_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Building Name"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/building_address_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Address..."
+            android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/start_time_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/select_start_time"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            android:textSize="16sp" />
-
+            android:text="@string/risk_level"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="24sp" />
 
         <TextView
-            android:id="@+id/end_time_label"
+            android:id="@+id/risk_level_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/select_end_time"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:text="srgrildfgfd /n djslfdfg \n dhgsldfgsd"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/entry_requirements"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/entry_requirements_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:text="srgrildfgfd /n djslfdfg \n dhgsldfgsd"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="16sp" />
 
         <Button
@@ -46,7 +81,7 @@
             android:layout_height="wrap_content"
             android:padding="12dp"
             android:layout_marginTop="12dp"
-            android:text="@string/add_visit" />
+            android:text="@string/add_visit_building" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

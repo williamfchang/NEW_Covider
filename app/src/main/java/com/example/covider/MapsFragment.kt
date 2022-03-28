@@ -31,7 +31,7 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
     private val db = Firebase.firestore
 
     // member vars
-    private var buildingMarkers = ArrayList<Marker>()
+    public var buildingMarkers = ArrayList<Marker>()
     private val priority1MinZoom = 16.5
     private lateinit var listButton: Button
 
