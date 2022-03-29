@@ -1,14 +1,12 @@
 package com.example.covider.models
 
-typealias CourseID = String
+import com.google.firebase.firestore.DocumentId
 
-class Course(val title: String,
-             val days: List<String>,
-             startTime: Int = 0,
-             endTime: Int = 0,
-             buildingID: String) : Visit(startTime, endTime, buildingID) {
-
-    val instructors = mutableListOf<Instructor>()
-    val students = mutableListOf<Student>()
+data class Course(
+    val section: String = "",
+    val title: String = "",
+    val days: List<String> = listOf<String>(),
+    val instructors:MutableList<IdAndName> = mutableListOf<IdAndName>(),
+    val students:MutableList<IdAndName> = mutableListOf<IdAndName>(),
     var mode: CoviderEnums.ClassMode = CoviderEnums.ClassMode.INPERSON
-}
+)
