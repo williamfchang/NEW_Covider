@@ -54,7 +54,10 @@
     <string name="text_usc_id">USC ID: </string>
     <string name="text_courses">Courses</string>
     <string name="text_health_reports">Health Reports</string>
-    <string name="text_instructor">"Instructor: "</string>
+    <string name="text_instructor">"Instructor(s): "</string>
+    <string name="logout">Logout</string>
+    <string name="text_students">Students</string>
+    <string name="text_course_health_reports">Course Health Reports</string>
 
     <!-- Attestation Form -->
     <string name="symptoms_header">Symptoms</string>

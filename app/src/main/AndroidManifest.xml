@@ -50,6 +50,9 @@
         <activity
             android:name=".BuildingsActivity"
             android:exported="false" />
+        <activity
+            android:name=".CourseViewActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
