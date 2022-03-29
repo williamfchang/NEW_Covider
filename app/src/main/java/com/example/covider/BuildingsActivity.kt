@@ -21,6 +21,7 @@ class BuildingsActivity : AppCompatActivity() {
 
     // firestore
     private val db = Firebase.firestore
+    private var buildingsLoaded = false // don't want to load buildings multiple times
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,26 +35,40 @@ class BuildingsActivity : AppCompatActivity() {
     }
 
     private fun getBuildingInfo() {
-            // pull buildings from Firebase
+        // if buildings are already loaded, just load the page
+        if (buildingsLoaded) {
+            Log.i(TAG(), "Buildings already loaded!")
+
+            // Get buildings by priority
+            insertBuildingsByPriority()
+
+            Log.i(TAG(), buildingsByPriority.toString())
+            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, buildingsByPriority)
+            listView.adapter = adapter
+        }
+        else {
+            // otherwise, pull buildings from Firebase
             db.collection("buildings").get()
-            .addOnSuccessListener { result ->
-                // loop through all building docs to create Building object
-                for (doc in result) {
-                    buildings[doc.id] = doc.toObject<Building>()
+                .addOnSuccessListener { result ->
+                    // loop through all building docs to create Building object
+                    for (doc in result) {
+                        buildings[doc.id] = doc.toObject<Building>()
+                    }
+
+                    buildingsLoaded = true
+                    Log.i(TAG(), "Successfully created ${buildings.size} buildings")
+
+                    // Get buildings by priority
+                    insertBuildingsByPriority()
+
+                    Log.i(TAG(), buildingsByPriority.toString())
+                    val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, buildingsByPriority)
+                    listView.adapter = adapter
                 }
-
-                Log.i(TAG(), "Successfully created ${buildings.size} buildings")
-
-                // Now draw buildings on map
-                insertBuildingsByPriority()
-
-                Log.i(TAG(), buildingsByPriority.toString())
-                val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, buildingsByPriority)
-                listView.adapter = adapter
-            }
-            .addOnFailureListener { exception ->
-                Log.w(TAG(), "Error getting buildings.", exception)
-            }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG(), "Error getting buildings.", exception)
+                }
+        }
     }
 
     private fun insertBuildingsByPriority () {
@@ -64,10 +79,15 @@ class BuildingsActivity : AppCompatActivity() {
                 null -> "N/A"
                 else -> b.id
             }
+            val bColonAndName = when (b.name) {
+                null -> ""
+                else -> ": ${b.name}"
+            }
+
             if (b.priority == 2) {
-                priority2.add(bId + " [*]")
+                priority2.add("$bId [*]$bColonAndName")
             } else if (b.priority == 1) {
-                priority1.add(bId)
+                priority1.add("$bId$bColonAndName")
             }
         }
         buildingsByPriority.addAll(priority2)

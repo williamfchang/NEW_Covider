@@ -79,7 +79,7 @@ class HealthReportActivity : AppCompatActivity() {
                 val visitsRef = db.collection("visits")
                 val recentVisitsOfUser = visitsRef
                     .whereEqualTo("userID", uid)
-                    .whereGreaterThanOrEqualTo("startTime", Timestamp(threeDaysBefore.time))
+                    .whereGreaterThanOrEqualTo("endTime", Timestamp(threeDaysBefore.time))
 
                 // go through each visit and update userWasPositive field to true
                 recentVisitsOfUser.get()
