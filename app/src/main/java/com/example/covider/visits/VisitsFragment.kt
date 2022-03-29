@@ -2,6 +2,7 @@ package com.example.covider.visits
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,11 +14,21 @@ import android.widget.AdapterView
 import android.widget.Button
 import com.example.covider.BuildingsActivity
 import com.example.covider.R
+import com.example.covider.TAG
+import com.example.covider.models.Visit
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
+import java.util.*
 
 /**
  * A fragment representing a list of Items.
  */
 class VisitsFragment : Fragment() {
+    private val auth = Firebase.auth
+    private val db = Firebase.firestore
+
     private lateinit var addButton: Button
     private lateinit var listView: RecyclerView
     private var columnCount = 1
@@ -48,6 +59,41 @@ class VisitsFragment : Fragment() {
             }
         }
 
+        // -- Load visits from Firebase -- //
+        // get time from a week back
+        val weekBefore = Calendar.getInstance()
+        weekBefore.add(Calendar.DAY_OF_YEAR, -7)
+
+        Log.i(TAG(), "A week before: ${weekBefore.time}")
+
+        // get current user
+        val uid = auth.currentUser!!.uid
+
+        // Add visits from the past week to our VisitList
+        val recentVisitsQuery = db.collection("visits")
+            .whereGreaterThanOrEqualTo("endTime", weekBefore.time)
+            .whereEqualTo("userID", uid)
+
+        recentVisitsQuery.get()
+            .addOnSuccessListener { result ->
+                // clear visit list first
+                VisitList.clearVisits()
+
+                // fill in visit list
+                for (doc in result) {
+                    VisitList.addVisit(doc.toObject())
+                }
+
+                listView.adapter!!.notifyDataSetChanged()
+                Log.i(TAG(), "retrieved ${VisitList.visits.size} visits")
+            }
+            .addOnFailureListener { it ->
+                Log.w(TAG(), "Error retrieving recent visits of user", it)
+            }
+
+
+
+        // Logic for add visit button
         addButton = view.findViewById(R.id.button_add_visit_page)
         addButton.setOnClickListener {
             val intent = Intent(this.context, AddVisitActivity::class.java)

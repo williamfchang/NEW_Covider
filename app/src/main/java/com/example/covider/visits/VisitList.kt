@@ -11,4 +11,8 @@ object VisitList {
     fun addVisit(visit: Visit) {
         visits.add(visit)
     }
+
+    fun clearVisits() {
+        visits.clear()
+    }
 }

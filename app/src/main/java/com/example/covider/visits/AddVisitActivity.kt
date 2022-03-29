@@ -78,7 +78,10 @@ class AddVisitActivity : AppCompatActivity() {
                 // Add visit to visit list
                 val userID = auth.currentUser!!.uid
                 buildingID = buildingSpinner.selectedItem.toString()
-                val course = courseIDText.text.toString() // TODO: check if valid
+                val course = when {
+                    courseIDText.text.toString().isEmpty() -> null
+                    else -> courseIDText.text.toString()
+                }
                 val visit = Visit(startTime, endTime, buildingID.toString(), userID, false, course)
                 VisitList.addVisit(visit)
 
