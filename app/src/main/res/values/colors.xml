@@ -14,4 +14,12 @@
 
     <color name="orange_light">#FFFFC23F</color>
     <color name="orange_dark">#FFF2A500</color>
+
+
+    <!-- custom -->
+    <color name="cardinal_red">#C41E3A</color>
+    <color name="dark_red">#8B0000</color>
+
+    <color name="gold">#FFD700</color>
+    <color name="golden_yellow">#FFC000</color>
 </resources>
