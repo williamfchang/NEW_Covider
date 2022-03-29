@@ -12,9 +12,13 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import com.example.covider.models.HealthReport
 import com.example.covider.models.User
+import com.example.covider.models.Visit
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import java.util.*
 
 
 class ProfileFragment : Fragment() {
@@ -30,7 +34,9 @@ class ProfileFragment : Fragment() {
     private lateinit var email: TextView
     private lateinit var courseTable: LinearLayout
     private lateinit var hReportTable: LinearLayout
+    private lateinit var contactTable: LinearLayout
     private lateinit var addHealthReportButton: Button
+    private lateinit var logoutButton: Button
     private lateinit var loginButton: Button
 
     override fun onCreateView(
@@ -49,13 +55,26 @@ class ProfileFragment : Fragment() {
 
         courseTable = view.findViewById(R.id.table_courses)
         hReportTable = view.findViewById(R.id.table_health_reports)
+        contactTable = view.findViewById(R.id.table_contact_tracing)
 
+        // create health report
         addHealthReportButton = view.findViewById(R.id.button_upload_health_reports)
         addHealthReportButton.setOnClickListener {
             val intent = Intent(activity, HealthReportActivity::class.java)
             startActivity(intent)
         }
 
+        // log out
+        logoutButton = view.findViewById(R.id.button_logout)
+        logoutButton.setOnClickListener {
+            Firebase.auth.signOut() // sign out
+
+            // now switch intent
+            val intent = Intent(activity, LoginActivity::class.java)
+            startActivity(intent)
+        }
+
+        // go to login page
         loginButton = view.findViewById(R.id.button_profile_login)
         loginButton.visibility = View.GONE
         loginButton.setOnClickListener {
@@ -100,6 +119,32 @@ class ProfileFragment : Fragment() {
                     else{
                         onFirestoreGetFailed("Failed to retrieve user info")
                     }
+                }
+
+            // -- Contact tracing -- //
+            val uid = authUser.uid
+            val oneDayBefore = Calendar.getInstance()
+            oneDayBefore.add(Calendar.DAY_OF_YEAR, -1)
+
+            // get user's visits in the past day. Copied from HealthReportActivity
+            val visitsRef = db.collection("visits")
+            val recentVisitsOfUserQuery = visitsRef
+                .whereEqualTo("userID", uid)
+                .whereGreaterThanOrEqualTo("endTime", Timestamp(oneDayBefore.time))
+
+            // get buildings visited within the past day
+            var recentBuildings = HashSet<String>() // "SAL", "TCC", etc.
+            recentVisitsOfUserQuery.get()
+                .addOnSuccessListener { result ->
+                    for (doc in result) {
+                        recentBuildings.add(doc.get("buildingID") as String)
+                    }
+
+                    Log.i(TAG(), "Successfully found recent buildings: $recentBuildings")
+                    getAndDisplayContactVisits(uid, recentBuildings)
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG(), "Error trying to find recent buildings", exception)
                 }
         }
         else{
@@ -202,6 +247,86 @@ class ProfileFragment : Fragment() {
             hReportTable.addView(tableRow)
         }
     }
+
+    private fun displayContactTracing(contactTable: LinearLayout, contacts: List<Visit>) {
+        val tableParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        val rowParams: TableRow.LayoutParams =
+            TableRow.LayoutParams(
+                TableRow.LayoutParams.WRAP_CONTENT,
+                TableRow.LayoutParams.WRAP_CONTENT
+            )
+
+        if (contacts.isEmpty()){
+            val tableRow = TableRow(context)
+            tableRow.layoutParams = tableParams // TableLayout is the parent view
+            tableRow.gravity = Gravity.CENTER_HORIZONTAL
+
+            val textView = TextView(context)
+            textView.layoutParams = rowParams // TableRow is the parent view
+            textView.text = "No close contacts found"
+
+            tableRow.addView(textView)
+            contactTable.addView(tableRow)
+        }
+
+        for (visit in contacts){
+            val tableRow = TableRow(context)
+            tableRow.layoutParams = tableParams // TableLayout is the parent view
+            tableRow.gravity = Gravity.CENTER_HORIZONTAL
+
+            val info = TextView(context)
+            info.layoutParams = rowParams
+            info.text = "${visit.endTime!!.toDate()} @ ${visit.buildingID}"
+
+            tableRow.addView(info)
+//            tableRow.addView(buildingCode)
+            contactTable.addView(tableRow)
+        }
+    }
+
+
+    private fun getAndDisplayContactVisits(uid: String, recentBuildings: HashSet<String>) {
+        val oneDayBefore = Calendar.getInstance()
+        oneDayBefore.add(Calendar.DAY_OF_YEAR, -1)
+
+        val visitsRef = db.collection("visits")
+
+        // get all global visits in the past day to those buildings that were POSITIVE
+        // ...unless empty, then just call displayContactTracing with an empty array
+        if (recentBuildings.isEmpty()) {
+            Log.i(TAG(), "No recent buildings found, no contact tracing query used")
+            displayContactTracing(contactTable, ArrayList<Visit>())
+        }
+        else {
+            val contactVisitsQuery = visitsRef
+                .whereEqualTo("userWasPositive", true)
+                .whereGreaterThanOrEqualTo("endTime", Timestamp(oneDayBefore.time))
+                .whereIn("buildingID", recentBuildings.toList())
+
+            // Pull these visits out and pass to display function
+            var contactVisits = ArrayList<Visit>()
+
+            contactVisitsQuery.get()
+                .addOnSuccessListener { result ->
+                    for (doc in result) {
+                        // Only add if it's not yourself
+                        if ((doc.get("userID") as String) != uid) {
+                            contactVisits.add(doc.toObject())
+                        }
+                    }
+
+                    Log.i(TAG(), "Successfully found close contacts: $contactVisits")
+                    displayContactTracing(contactTable, contactVisits)
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG(), "Error getting close contact visits.", exception)
+                }
+        }
+    }
+
 
     private fun onFirestoreGetFailed(errorMsg: String) {
         Log.e(TAG(), errorMsg)

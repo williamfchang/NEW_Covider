@@ -54,6 +54,7 @@
     <string name="text_usc_id">USC ID: </string>
     <string name="text_courses">Courses</string>
     <string name="text_health_reports">Health Reports</string>
+    <string name="text_contact_tracing">Contact Tracing Notifications</string>
     <string name="text_instructor">"Instructor(s): "</string>
     <string name="logout">Logout</string>
     <string name="text_students">Students</string>
@@ -75,7 +76,7 @@
 
     <string name="positive_result">I received a positive test result</string>
     <string name="verify_attestation">I attest that my answer to the above wellness assessment questions are accurate</string>
-
+    <string name="upload_heath_report">Upload Heath Report</string>
 
 
 </resources>
