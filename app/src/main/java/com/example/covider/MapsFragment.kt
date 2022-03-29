@@ -37,6 +37,8 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
     private val priority1MinZoom = 16.5
     private lateinit var listButton: Button
 
+    private var buildingsLoaded = false
+
     private val callback = OnMapReadyCallback { map ->
         /**
          * Manipulates the map once available.
@@ -119,25 +121,33 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 
     // -- helper functions -- //
     private fun getAndDrawBuildings(map: GoogleMap) {
-        // pull buildings from Firebase
+        if (buildingsLoaded) {
+            drawBuildingMarkers(map)
+        }
+        else {
+            // pull buildings from Firebase
             db.collection("buildings").get()
-            .addOnSuccessListener { result ->
-                // loop through all building docs to create Building object
-                for (doc in result) {
-                    buildings.add(doc.toObject<Building>())
+                .addOnSuccessListener { result ->
+                    // loop through all building docs to create Building object
+                    for (doc in result) {
+                        buildings.add(doc.toObject<Building>())
+                    }
+
+                    buildingsLoaded = true
+                    Log.i(TAG(), "Successfully created ${buildings.size} buildings")
+
+                    // Now draw buildings on map
+                    drawBuildingMarkers(map)
                 }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG(), "Error getting buildings.", exception)
+                }
+        }
 
-                Log.i(TAG(), "Successfully created ${buildings.size} buildings")
 
-                // Now draw buildings on map
-                drawBuildingMarkers(map, buildings.toTypedArray())
-            }
-            .addOnFailureListener { exception ->
-                Log.w(TAG(), "Error getting buildings.", exception)
-            }
     }
 
-    private fun drawBuildingMarkers(map: GoogleMap, buildings: Array<Building>) {
+    private fun drawBuildingMarkers(map: GoogleMap) {
         // draw each building that has show as true
         for (b in buildings) {
             if (b.priority == 0) continue // skip buildings that are hidden
