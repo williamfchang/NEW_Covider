@@ -2,11 +2,11 @@
 
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".visits.AddVisitActivity">
@@ -82,7 +82,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/class_code"
-                android:inputType="textEmailAddress" />
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/input_course_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter section id with format 12345"
+                android:inputType="number" />
 
             <Button
                 android:id="@+id/button_add_visit"

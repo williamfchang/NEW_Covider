@@ -9,9 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.covider.MainActivity
 import com.example.covider.R
 import com.example.covider.TAG
-import com.example.covider.models.Visit
+import com.example.covider.models.*
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
@@ -22,16 +23,20 @@ class AddVisitActivity : AppCompatActivity() {
     private lateinit var startPicker : TimePicker
     private lateinit var endPicker : TimePicker
     private lateinit var courseSwitch: Switch
+    private lateinit var courseSection: EditText
     private lateinit var addButton: Button
 
     private lateinit var building: String
     private var startTime : Timestamp? = null
     private var endTime : Timestamp? = null
-    private lateinit var courseIDText : EditText
+    private lateinit var courseTitle : EditText
 
     // firebase
     private val auth = Firebase.auth
     private val db = Firebase.firestore
+
+    // user model needed for adding Course
+    private lateinit var user: User
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,14 +60,20 @@ class AddVisitActivity : AppCompatActivity() {
         setTimePickerDefaults()
 
         // Set up switch and textfield visibility
-        courseIDText = findViewById(R.id.input_course_code)
-        courseIDText.visibility = View.INVISIBLE
+        courseTitle = findViewById(R.id.input_course_code)
+        courseTitle.visibility = View.INVISIBLE
+
+        courseSection = findViewById(R.id.input_course_section)
+        courseSection.visibility = View.INVISIBLE
+
         courseSwitch = findViewById(R.id.switch_class)
         courseSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                courseIDText.visibility = View.VISIBLE
+                courseTitle.visibility = View.VISIBLE
+                courseSection.visibility = View.VISIBLE
             } else {
-                courseIDText.visibility = View.INVISIBLE
+                courseTitle.visibility = View.INVISIBLE
+                courseSection.visibility = View.INVISIBLE
             }
         }
 
@@ -78,15 +89,62 @@ class AddVisitActivity : AppCompatActivity() {
                 // Add visit to visit list
                 val userID = auth.currentUser!!.uid
                 buildingID = buildingSpinner.selectedItem.toString()
-                val course = when {
-                    courseIDText.text.toString().isEmpty() -> null
-                    else -> courseIDText.text.toString()
-                }
-                val visit = Visit(startTime, endTime, buildingID.toString(), userID, false, course)
+                val title = courseTitle.text.toString()
+                val section = courseSection.text.toString()
+                val visit = Visit(startTime, endTime, buildingID.toString(), userID, false, section)
                 VisitList.addVisit(visit)
 
                 // Add visit to Firebase
                 db.collection("visits").add(visit)
+
+                // if visit is a course, add course to Firebase
+                // first get the user to determine which list to add to
+                if (courseSwitch.isChecked && title.isNotBlank() && section.isNotBlank()){
+
+                    var authUser = auth.currentUser
+                    val userDocRef = db.collection("users").document(authUser!!.uid)
+                    userDocRef.get()
+                        .addOnCompleteListener {
+                            if (it.isSuccessful){
+                                var d = it.result
+                                user = d.toObject(User::class.java)!!
+
+                                // check to see if the course already exists
+                                val courseDocRef = db.collection("courses").document(section)
+                                courseDocRef.get()
+                                    .addOnCompleteListener { task ->
+                                        if (task.isSuccessful && task.result.exists()) {
+                                            Log.i(TAG(), "Found course with section: $section! Updating user lists...")
+
+                                            // update the appropriate list in the course
+                                            if (user.role == CoviderEnums.UserType.STUDENT){
+                                                courseDocRef.update("students",FieldValue.arrayUnion(IdAndName(authUser.uid, user.name)))
+                                            }
+                                            else if (user.role == CoviderEnums.UserType.INSTRUCTOR){
+                                                courseDocRef.update("instructors",FieldValue.arrayUnion(IdAndName(authUser.uid, user.name)))
+                                            }
+                                        }
+                                        else{
+                                            Log.i(TAG(), "Didn't find course with section: $section, so uploading new course")
+
+                                            // create a new course with a new student
+                                            var c = Course(section, title)
+                                            if (user.role == CoviderEnums.UserType.STUDENT){
+                                                c.students.add(IdAndName(authUser.uid, user.name))
+                                            }
+                                            else if (user.role == CoviderEnums.UserType.INSTRUCTOR){
+                                                c.instructors.add(IdAndName(authUser.uid, user.name))
+                                            }
+
+                                            // upload the new course
+                                            db.collection("courses").document(section).set(c)
+                                        }
+                                    }
+                            }
+                        }
+
+                    db.collection("users").document(authUser!!.uid).update("courses",FieldValue.arrayUnion(section))
+                }
 
                 // Return to main page
                 val intent = Intent(this, MainActivity::class.java)

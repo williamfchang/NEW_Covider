@@ -92,6 +92,12 @@ class ProfileFragment : Fragment() {
                 .addOnCompleteListener {  task ->
                     if (task.isSuccessful){
                         val document = task.result
+
+                        if (document.toObject(User::class.java) == null){
+                            val intent = Intent(activity, LoginActivity::class.java)
+                            startActivity(intent)
+                        }
+
                         user = document.toObject(User::class.java)!!
                         name.text = user.name
                         userType.text = user.role.name

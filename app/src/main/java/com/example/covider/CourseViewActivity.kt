@@ -36,10 +36,9 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
     private lateinit var updateCourseModeButton: Button
     private lateinit var tmpCourseMode: CoviderEnums.ClassMode
 
-    // get the Course Health Stats for the past few days
     private val numCasesOneDay: MutableSet<String> =  mutableSetOf()
+    private val numCasesOneWeek: MutableSet<String> = mutableSetOf()
     private val numCasesOneMonth: MutableSet<String> = mutableSetOf()
-    private val numCasesOneYear: MutableSet<String> = mutableSetOf()
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +56,17 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
         viewWeeklyCourseCases = findViewById(R.id.view_weekly_course_cases)
         viewMonthlyCourseCases = findViewById(R.id.view_monthly_course_cases)
         updateCourseModeButton = findViewById(R.id.button_update_course_mode)
-        //updateCourseModeButton.setOnClickListener { createAccount() }
+
+        spinner = findViewById(R.id.spinner_course_mode)
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item, CoviderEnums.ClassMode.values()
+        )
+        spinner.adapter = adapter
+
+//        updateCourseModeButton.setOnClickListener {
+//            viewCourseMode.text = tmpCourseMode.name
+//        }
 
         // if you are not an instructor, you don't have access to these values
         if (userRole != CoviderEnums.UserType.INSTRUCTOR.name){
@@ -66,13 +75,6 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
             updateCourseModeButton.visibility = View.GONE
             spinner.visibility = View.GONE
         }
-
-        spinner = findViewById(R.id.spinner_course_mode)
-        val adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item, CoviderEnums.ClassMode.values()
-        )
-        spinner.adapter = adapter
 
         // Initialize Firebase
         db = FirebaseFirestore.getInstance()
@@ -113,27 +115,28 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
                         viewInstructor.text = str
                         displayStudents(studentTable, course.students)
 
+
+                        // Get the Course Health Stats for the past few days
                         val oneDayBefore = Calendar.getInstance()
                             oneDayBefore.add(Calendar.DAY_OF_YEAR, -1)
+                        val oneWeekBefore = Calendar.getInstance()
+                            oneWeekBefore.add(Calendar.DAY_OF_YEAR, -30)
                         val oneMonthBefore = Calendar.getInstance()
-                            oneMonthBefore.add(Calendar.DAY_OF_YEAR, -30)
-                        val oneYearBefore = Calendar.getInstance()
-                            oneYearBefore.add(Calendar.DAY_OF_YEAR, -365)
+                            oneMonthBefore.add(Calendar.DAY_OF_YEAR, -365)
 
-                        // get subset Firebase visits collection based on query (same userID within 3 days)
                         val reportsRef = db.collection("healthReports")
                         for (s in course.students) {
                             val oneDayClassReports = reportsRef
                                 .whereEqualTo("userID", s.first).whereEqualTo("testedPositive", true)
                                 .whereGreaterThanOrEqualTo("date", Timestamp(oneDayBefore.time))
+                            val oneWeekClassReports = reportsRef
+                                .whereEqualTo("userID", s.first).whereEqualTo("testedPositive", true)
+                                .whereGreaterThanOrEqualTo("date", Timestamp(oneWeekBefore.time))
                             val oneMonthClassReports = reportsRef
                                 .whereEqualTo("userID", s.first).whereEqualTo("testedPositive", true)
-                                .whereGreaterThanOrEqualTo("date", Timestamp(oneDayBefore.time))
-                            val oneYearClassReports = reportsRef
-                                .whereEqualTo("userID", s.first).whereEqualTo("testedPositive", true)
-                                .whereGreaterThanOrEqualTo("date", Timestamp(oneDayBefore.time))
+                                .whereGreaterThanOrEqualTo("date", Timestamp(oneMonthBefore.time))
 
-                            oneDayClassReports.get()
+                            oneWeekClassReports.get()
                                 .addOnSuccessListener { result ->
                                     for (d in result.documents){
                                         Log.i(TAG(), "Document: ${d}")
@@ -141,6 +144,32 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
                                     }
                                     Log.i(TAG(), "Successfully modified one day positive cases for course")
                                     viewDailyCourseCases.text = numCasesOneDay.size.toString()
+                                }
+                                .addOnFailureListener { it ->
+                                    Log.i(TAG(), "Failed to open visits collection", it)
+                                }
+
+                            oneDayClassReports.get()
+                                .addOnSuccessListener { result ->
+                                    for (d in result.documents){
+                                        Log.i(TAG(), "Document: ${d}")
+                                        numCasesOneWeek.add(d["userID"] as String)
+                                    }
+                                    Log.i(TAG(), "Successfully modified one day positive cases for course")
+                                    viewWeeklyCourseCases.text = numCasesOneWeek.size.toString()
+                                }
+                                .addOnFailureListener { it ->
+                                    Log.i(TAG(), "Failed to open visits collection", it)
+                                }
+
+                            oneMonthClassReports.get()
+                                .addOnSuccessListener { result ->
+                                    for (d in result.documents){
+                                        Log.i(TAG(), "Document: ${d}")
+                                        numCasesOneMonth.add(d["userID"] as String)
+                                    }
+                                    Log.i(TAG(), "Successfully modified one day positive cases for course")
+                                    viewMonthlyCourseCases.text = numCasesOneMonth.size.toString()
                                 }
                                 .addOnFailureListener { it ->
                                     Log.i(TAG(), "Failed to open visits collection", it)
@@ -203,9 +232,9 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
         Log.i(TAG(), tmpCourseMode.name)
     }
 
-    private fun updateMode(mode: CoviderEnums.ClassMode){
-
-    }
+//    private fun updateMode(mode: CoviderEnums.ClassMode){
+//
+//    }
 
     override fun onNothingSelected(p0: AdapterView<*>?) {
         TODO("Not yet implemented")
