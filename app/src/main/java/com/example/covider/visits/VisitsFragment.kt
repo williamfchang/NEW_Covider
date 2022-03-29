@@ -51,6 +51,7 @@ class VisitsFragment : Fragment() {
         addButton = view.findViewById(R.id.button_add_visit_page)
         addButton.setOnClickListener {
             val intent = Intent(this.context, AddVisitActivity::class.java)
+            intent.putExtra("buildingID", "ACB")
             startActivity(intent)
         }
         return view

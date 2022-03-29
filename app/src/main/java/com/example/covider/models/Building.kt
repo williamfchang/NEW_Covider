@@ -2,16 +2,16 @@ package com.example.covider.models
 
 import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.GeoPoint
+import java.io.Serializable
 
-data class Building(
+data class Building (
     @DocumentId val id: String? = null,
     val name: String? = null,
     val coordinates: GeoPoint? = null,
     val address: String? = null,
     val priority: Int = 0,
     val risk: Int = 1000
-)
-
+) : Serializable
 
 
 /* Priority is defined as follows:

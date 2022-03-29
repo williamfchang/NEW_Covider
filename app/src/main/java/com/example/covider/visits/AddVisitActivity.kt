@@ -24,13 +24,12 @@ class AddVisitActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener
     private lateinit var startPicker : TimePicker
     private lateinit var endPicker : TimePicker
     private lateinit var switch: Switch
-    private lateinit var textField: EditText
     private lateinit var addButton: Button
 
     private lateinit var building: String
     private var startTime : Timestamp? = null
     private var endTime : Timestamp? = null
-    private lateinit var courseID : EditText
+    private lateinit var courseIDText : EditText
 
     // firebase
     private val auth = Firebase.auth
@@ -48,34 +47,37 @@ class AddVisitActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener
             )
             spinner.adapter = adapter
         }
-        var buildingID: Int = intent.getIntExtra("Building Index", 0)
-        spinner.setSelection(buildingID)
-        building = resources.getStringArray(R.array.Buildings)[buildingID]
+        var buildingID = intent.getStringExtra("buildingID")!!
+        val buildingIndex = getIndex(spinner, buildingID)
+        spinner.setSelection(buildingIndex)
+        building = resources.getStringArray(R.array.Buildings)[buildingIndex]
 
         setTimePickerDefaults()
 
-        textField = findViewById(R.id.input_course_code)
-        textField.visibility = View.INVISIBLE
+        courseIDText = findViewById(R.id.input_course_code)
+        courseIDText.visibility = View.INVISIBLE
         switch = findViewById(R.id.switch_class)
         switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                textField.visibility = View.VISIBLE
+                courseIDText.visibility = View.VISIBLE
             } else {
-                textField.visibility = View.INVISIBLE
+                courseIDText.visibility = View.INVISIBLE
             }
         }
 
-        courseID = findViewById(R.id.input_course_code)
-        // TODO: Change
         addButton = findViewById(R.id.button_add_visit)
         addButton.setOnClickListener {
-            val userID = auth.currentUser!!.uid
-            val course = courseID.text.toString()
-            val visit = Visit(startTime, endTime, buildingID.toString(), userID, null, course)
-            VisitList.addVisit(visit)
-            Log.i(TAG(), "${(VisitList.visits).toString()}" )
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            if (startTime!!.compareTo(endTime!!) == -1) {
+                Toast.makeText(this, "Please select a valid time range", Toast.LENGTH_LONG).show()
+            } else {
+                val userID = auth.currentUser!!.uid
+                val course = courseIDText.text.toString() // TODO: check if valid
+                val visit = Visit(startTime, endTime, buildingID.toString(), userID, null, course)
+                VisitList.addVisit(visit)
+                Log.i(TAG(), "${(VisitList.visits).toString()}")
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+            }
         }
     }
 
@@ -117,6 +119,16 @@ class AddVisitActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener
         c[Calendar.HOUR_OF_DAY] = 13
         c[Calendar.MINUTE] = 30
         endTime = Timestamp(c.time)
+    }
+
+    //private method of your class
+    private fun getIndex(spinner: Spinner, string : String): Int {
+        for (i in 0..spinner.count) {
+            if (spinner.getItemAtPosition(i).toString() == string){
+                return i;
+            }
+        }
+        return 0;
     }
 
 }
