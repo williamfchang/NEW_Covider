@@ -8,6 +8,6 @@ data class Visit(
     var endTime: Timestamp? = null,
     var buildingID: String? = null,
     var userID: String? = null,
-    var userWasPositive: Boolean? = null,
+    var userWasPositive: Boolean = false,
     var courseID: String? = null
 )
