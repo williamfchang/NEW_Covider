@@ -16,7 +16,7 @@
         tools:layout_editor_absoluteY="0dp">
 
         <TextView
-            android:id="@+id/building_code_label"
+            android:id="@+id/building_id_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAlignment="center"
@@ -44,6 +44,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:text="@string/risk_level"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="24sp" />
@@ -61,6 +62,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:text="@string/entry_requirements"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="24sp" />

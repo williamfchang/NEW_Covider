@@ -90,6 +90,15 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
     override fun onInfoWindowClick(marker: Marker) {
         val building = marker.tag as Building
 
+        val intent = Intent(this.context, BuildingInfoActivity::class.java)
+
+        intent.putExtra("buildingID", building.id)
+        intent.putExtra("buildingName", building.name)
+        intent.putExtra("buildingAddress", building.address)
+
+
+        startActivity(intent)
+
         Toast.makeText(
             activity, "${building.id} @ ${building.address}",
             Toast.LENGTH_SHORT
