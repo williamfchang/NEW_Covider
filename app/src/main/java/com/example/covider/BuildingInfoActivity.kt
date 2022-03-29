@@ -31,7 +31,6 @@ class BuildingInfoActivity : AppCompatActivity() {
         val buildingName= intent.getStringExtra("buildingName")
         val buildingAddress= intent.getStringExtra("buildingAddress")
 
-        // TODO change how buildingID is being sent in
         addButton = findViewById(R.id.button_add_building_visit)
         addButton.setOnClickListener {
             val intent = Intent(this, AddVisitActivity::class.java)
@@ -45,40 +44,4 @@ class BuildingInfoActivity : AppCompatActivity() {
         buildingAddressText = findViewById(R.id.building_address_label)
         buildingAddressText.text = buildingAddress
     }
-
-    private fun getBuildingName() {
-        }
-
-//    private fun getBuildings() : ArrayList<Building> {
-//        val buildings = ArrayList<Building>()
-//        // pull buildings from Firebase
-//        db.collection("buildings").get()
-//            .addOnSuccessListener { result ->
-//
-//                // loop through all buildings
-//                for (doc in result) {
-//                    // get data fields
-//                    val data = doc.data
-//
-//                    val name = data["name"] as String
-//                    val coordAsGP = data["coordinates"] as GeoPoint
-//                    val coords = LatLng(coordAsGP.latitude, coordAsGP.longitude)
-//                    val address = when {
-//                        data.containsKey("address") -> data["address"] as String
-//                        else -> "N/A"
-//                    }
-//                    val priority = (data["priority"] as Long).toInt()
-//
-//                    // create new building for array
-//                    buildings.add(Building(doc.id, name, coords, address, priority))
-//                }
-//
-//                Log.i(TAG(), "Successfully created ${buildings.size} buildings")
-//
-//            }
-//            .addOnFailureListener { exception ->
-//                Log.w(TAG(), "Error getting buildings.", exception)
-//            }
-//        return buildings
-//    }
 }
