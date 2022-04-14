@@ -111,7 +111,7 @@ class GeneralUnitTest {
     }
 
     @Test
-    fun testContactTracing() {
+    fun testContactTracingSimple() {
         // Add a positive visit and a contact visit to Firebase
         var startTime = Calendar.getInstance()
         startTime[Calendar.HOUR_OF_DAY] = 10
@@ -146,7 +146,6 @@ class GeneralUnitTest {
         Awaitility.await().until(checkNullityOfContactVisits())
 
         // make sure we have at least one contact
-
         Assert.assertTrue(contactVisits!!.count() > 0)
 
         // look for the contact we added
@@ -166,4 +165,205 @@ class GeneralUnitTest {
         db.collection("visits").document("visit1").delete()
         db.collection("visits").document("visit2").delete()
     }
+
+
+    @Test
+    fun testContactTracingNonexactTime() {
+        // Add a positive visit and a contact visit to Firebase
+        var startTime = Calendar.getInstance()
+        startTime[Calendar.HOUR_OF_DAY] = 9
+        startTime[Calendar.MINUTE] = 0
+
+        var endTime = Calendar.getInstance()
+        endTime[Calendar.HOUR_OF_DAY] = 10
+        endTime[Calendar.MINUTE] = 30
+
+        db.collection("visits").document("visit1").set(
+            Visit(Timestamp(startTime.time), Timestamp(endTime.time),
+                "TCC", "user1", true, "1")
+        )
+
+        startTime[Calendar.HOUR_OF_DAY] = 11
+        startTime[Calendar.MINUTE] = 0
+
+        endTime[Calendar.HOUR_OF_DAY] = 12
+        endTime[Calendar.MINUTE] = 10
+
+        db.collection("visits").document("visit2").set(
+            Visit(Timestamp(startTime.time), Timestamp(endTime.time),
+                "TCC", "user2", false, "1")
+        )
+
+        Thread.sleep(1000)
+
+        // run the contact tracing finding function
+        ProfileFragment.queryForContact(db.collection("visits"),
+            hashSetOf("TCC"), "user2", ::contactTracingCallback)
+
+        Awaitility.await().until(checkNullityOfContactVisits())
+
+        // make sure we have at least one contact
+        Assert.assertTrue(contactVisits!!.count() > 0)
+
+        // look for the contact we added
+        var found = false
+        for (visit in contactVisits!!) {
+            if (visit.userID == "user1") {
+                found = true
+                break
+            }
+        }
+
+        // Assert if we found it
+        Assert.assertTrue(found)
+
+
+        // clean up (delete the visits we just made)
+        db.collection("visits").document("visit1").delete()
+        db.collection("visits").document("visit2").delete()
+    }
+
+    @Test
+    fun testContactTracingNoContact() {
+        // Add a positive visit and a contact visit to Firebase
+        var startTime = Calendar.getInstance()
+        startTime.add(Calendar.DAY_OF_YEAR, -3)
+        startTime[Calendar.HOUR_OF_DAY] = 9
+        startTime[Calendar.MINUTE] = 0
+
+        var endTime = Calendar.getInstance()
+        endTime.add(Calendar.DAY_OF_YEAR, -3)
+        endTime[Calendar.HOUR_OF_DAY] = 10
+        endTime[Calendar.MINUTE] = 30
+
+        db.collection("visits").document("visit1").set(
+            Visit(Timestamp(startTime.time), Timestamp(endTime.time),
+                "TCC", "user1", true, "1")
+        )
+
+        startTime.add(Calendar.DAY_OF_YEAR, 3)
+        startTime[Calendar.HOUR_OF_DAY] = 11
+        startTime[Calendar.MINUTE] = 0
+
+        endTime.add(Calendar.DAY_OF_YEAR, 3)
+        endTime[Calendar.HOUR_OF_DAY] = 12
+        endTime[Calendar.MINUTE] = 10
+
+        db.collection("visits").document("visit2").set(
+            Visit(Timestamp(startTime.time), Timestamp(endTime.time),
+                "TCC", "user2", false, "1")
+        )
+
+        Thread.sleep(1000)
+
+        // run the contact tracing finding function
+        ProfileFragment.queryForContact(db.collection("visits"),
+            hashSetOf("TCC"), "user2", ::contactTracingCallback)
+
+        Awaitility.await().until(checkNullityOfContactVisits())
+
+        // check for contacts (potentially other random visits)
+        var found = false
+        for (visit in contactVisits!!) {
+            if (visit.userID == "user1") {
+                found = true
+                break
+            }
+        }
+
+        // Assert if we found it
+        Assert.assertFalse(found)
+
+
+        // clean up (delete the visits we just made)
+        db.collection("visits").document("visit1").delete()
+        db.collection("visits").document("visit2").delete()
+    }
+
+
+    @Test
+    fun testContactTracing2Contacts() {
+        // User 1 positive visit
+        var startTime = Calendar.getInstance()
+        startTime[Calendar.HOUR_OF_DAY] = 9
+        startTime[Calendar.MINUTE] = 0
+
+        var endTime = Calendar.getInstance()
+        endTime[Calendar.HOUR_OF_DAY] = 10
+        endTime[Calendar.MINUTE] = 30
+
+        db.collection("visits").document("visit1").set(
+            Visit(Timestamp(startTime.time), Timestamp(endTime.time),
+                "TCC", "user1", true, "1")
+        )
+
+        // User 3 positive visit (diff building)
+        startTime[Calendar.HOUR_OF_DAY] = 8
+        startTime[Calendar.MINUTE] = 0
+
+        endTime[Calendar.HOUR_OF_DAY] = 9
+        endTime[Calendar.MINUTE] = 30
+
+        db.collection("visits").document("visit3").set(
+            Visit(Timestamp(startTime.time), Timestamp(endTime.time),
+                "SGM", "user3", true, "1")
+        )
+
+        // user 2 two visits
+        startTime[Calendar.HOUR_OF_DAY] = 11
+        startTime[Calendar.MINUTE] = 0
+
+        endTime[Calendar.HOUR_OF_DAY] = 12
+        endTime[Calendar.MINUTE] = 10
+
+        db.collection("visits").document("visit2").set(
+            Visit(Timestamp(startTime.time), Timestamp(endTime.time),
+                "TCC", "user2", false, "1")
+        )
+
+        startTime[Calendar.HOUR_OF_DAY] = 8
+        startTime[Calendar.MINUTE] = 0
+
+        endTime[Calendar.HOUR_OF_DAY] = 10
+        endTime[Calendar.MINUTE] = 30
+
+        db.collection("visits").document("visit4").set(
+            Visit(Timestamp(startTime.time), Timestamp(endTime.time),
+                "SGM", "user2", false, "1")
+        )
+
+
+
+        Thread.sleep(1000)
+
+        // run the contact tracing finding function
+        ProfileFragment.queryForContact(db.collection("visits"),
+            hashSetOf("TCC", "SGM"), "user2", ::contactTracingCallback)
+
+        Awaitility.await().until(checkNullityOfContactVisits())
+
+        // check for contacts (potentially other random visits)
+        var foundUser1 = false
+        var foundUser3 = false
+
+        for (visit in contactVisits!!) {
+            if (visit.userID == "user1") {
+                foundUser1 = true
+            }
+            if (visit.userID == "user3") {
+                foundUser3 = true
+            }
+        }
+
+        // Assert if we found it
+        Assert.assertTrue(foundUser1)
+        Assert.assertTrue(foundUser3)
+
+
+        // clean up (delete the visits we just made)
+        db.collection("visits").document("visit1").delete()
+        db.collection("visits").document("visit2").delete()
+    }
+
+
 }
