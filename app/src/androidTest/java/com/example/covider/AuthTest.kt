@@ -103,7 +103,14 @@ class AuthTest {
 
     @Test
     fun testLogin() {
+        // Make sure we're logged out
+        Firebase.auth.signOut()
+        Thread.sleep(transitionDelay)
+
+        // Now test login on page
         launchActivity<LoginActivity>().use { scenario ->
+            Thread.sleep(transitionDelay)
+
             // Login with account
             onView(withId(R.id.input_email)).perform(typeText("existinguser@usc.edu"))
             onView(withId(R.id.input_password)).perform(typeText("password"))
