@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.example.covider.models.HealthReport
 import com.example.covider.models.User
 import com.example.covider.models.Visit
+import com.example.covider.services.DatabaseService
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -25,6 +26,7 @@ class ProfileFragment : Fragment() {
 
     private val auth = Firebase.auth
     private val db = FirebaseFirestore.getInstance()
+    private val ds = DatabaseService(db)
     private lateinit var user: User
 
     private lateinit var linearLayout: LinearLayout
@@ -83,6 +85,16 @@ class ProfileFragment : Fragment() {
         }
 
         // Grab and display the text necessary for this Fragment from Firebase
+//        ds.retrieveCurrentUser{ user: User? ->
+//            if (user != null){
+//                displayUserInfo(user)
+//            }
+//            else {
+//                val intent = Intent(activity, LoginActivity::class.java)
+//                startActivity(intent)
+//            }
+//        }
+
         val authUser = auth.currentUser
         if (authUser != null){
 
@@ -105,21 +117,21 @@ class ProfileFragment : Fragment() {
                         email.text = user.email
 
                         // print out user classes in table
-                        displayUserCourses(courseTable, user.courses)
+                        displayUserCourses(user.courses)
 
                         // retrieve and print out user health reports in table
                         val userHealthReports = mutableListOf<HealthReport>()
-                        val hReportDocRef = db.collection("healthReports").whereEqualTo("uid", authUser.uid)
+                        val hReportDocRef = db.collection("healthReports").whereEqualTo("userID", authUser.uid)
                         hReportDocRef.get()
                             .addOnSuccessListener{ documents ->
                                 for (d in documents){
                                     userHealthReports.add(d.toObject(HealthReport::class.java))
                                 }
-                                displayUserHealthReports(hReportTable, userHealthReports)
+                                displayUserHealthReports(userHealthReports)
                             }
                             .addOnFailureListener { exception ->
                                 Log.w(TAG(), "Error getting Health Report Documents: ", exception)
-                                displayUserHealthReports(hReportTable, userHealthReports)
+                                displayUserHealthReports(userHealthReports)
                             }
                     }
                     else{
@@ -161,7 +173,24 @@ class ProfileFragment : Fragment() {
         return view
     }
 
-    private fun displayUserCourses(courseTable: LinearLayout, courses: List<String>){
+    private fun displayUserInfo(user: User) {
+        name.text = user.name
+        userType.text = user.role.name
+        uscID.text = user.uscID
+        email.text = user.email
+
+        // print out user classes in table
+        displayUserCourses(user.courses)
+
+        // retrieve and print out health reports
+        ds.retrieveListOfUserHealthStats(::displayUserHealthReports)
+
+        // retrieve and print out close contacts
+        ds.retrieveCloseContactVisits(::displayContactTracing)
+
+    }
+
+    private fun displayUserCourses(courses: List<String>){
         val tableParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -206,7 +235,7 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun displayUserHealthReports(hReportTable: LinearLayout, hReports: List<HealthReport>){
+    private fun displayUserHealthReports(hReports: List<HealthReport>){
         val tableParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
@@ -217,6 +246,19 @@ class ProfileFragment : Fragment() {
                 TableRow.LayoutParams.WRAP_CONTENT
             )
 
+        // header row
+        val rowheader = TableRow(context)
+        rowheader.layoutParams = tableParams // TableLayout is the parent view
+        rowheader.gravity = Gravity.CENTER_HORIZONTAL
+
+        val headerText = TextView(context)
+        headerText.layoutParams = rowParams
+        headerText.text = "Date | Num Symptoms | Test Result"
+
+        rowheader.addView(headerText)
+        hReportTable.addView(rowheader)
+
+        // remaining rows
         if (hReports.isEmpty()){
             val tableRow = TableRow(context)
             tableRow.layoutParams = tableParams // TableLayout is the parent view
@@ -237,11 +279,11 @@ class ProfileFragment : Fragment() {
 
             val date = TextView(context)
             date.layoutParams = rowParams
-            date.text = hr.date.toString()
+            date.text = hr.date!!.toDate().toString()
 
             val numSymptoms = TextView(context)
             numSymptoms.layoutParams = rowParams
-            numSymptoms. text = hr.numSymptoms.toString()
+            numSymptoms.text = " | " + hr.numSymptoms.toString() + " | "
 
             val testResult = TextView(context)
             testResult.layoutParams = rowParams
@@ -254,7 +296,7 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun displayContactTracing(contactTable: LinearLayout, contacts: List<Visit>) {
+    private fun displayContactTracing(contacts: List<Visit>) {
         val tableParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
@@ -304,7 +346,7 @@ class ProfileFragment : Fragment() {
         // ...unless empty, then just call displayContactTracing with an empty array
         if (recentBuildings.isEmpty()) {
             Log.i(TAG(), "No recent buildings found, no contact tracing query used")
-            displayContactTracing(contactTable, ArrayList<Visit>())
+            displayContactTracing(ArrayList<Visit>())
         }
         else {
             val contactVisitsQuery = visitsRef
@@ -325,7 +367,7 @@ class ProfileFragment : Fragment() {
                     }
 
                     Log.i(TAG(), "Successfully found close contacts: $contactVisits")
-                    displayContactTracing(contactTable, contactVisits)
+                    displayContactTracing(contactVisits)
                 }
                 .addOnFailureListener { exception ->
                     Log.w(TAG(), "Error getting close contact visits.", exception)
