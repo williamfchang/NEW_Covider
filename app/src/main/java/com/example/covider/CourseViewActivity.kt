@@ -1,29 +1,17 @@
 package com.example.covider
 
-import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.covider.models.*
-import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
+import com.example.covider.services.DatabaseService
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
-import java.util.*
 
 class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener{
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
-    private lateinit var course: Course
-
-    private lateinit var linearLayout: LinearLayout
+    private lateinit var ds: DatabaseService
     private lateinit var viewCourseId: TextView
     private lateinit var viewCourseMode: TextView
     private lateinit var viewInstructor: TextView
@@ -76,114 +64,14 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
             spinner.visibility = View.GONE
         }
 
-        // Initialize Firebase
-        db = FirebaseFirestore.getInstance()
+        // Initialize database service
+        ds = DatabaseService(FirebaseFirestore.getInstance())
 
-//        db.collection("courses").document("2")
-//            .set(Course("2",
-//                "CSCI104", listOf("M", "W", "F"),
-//                mutableListOf(IdAndName("cyACUzs5KBS0yavomplcbd1XjJB3", "Nirav")),
-//                mutableListOf(IdAndName("cyACUzs5KBS0yavomplcbd1XjJB3", "Nirav")),
-//                CoviderEnums.ClassMode.HYBRID))
-
-        // get course info
-        val courseDocRef = db.collection("courses").document(courseSection!!)
-        courseDocRef.get()
-            .addOnCompleteListener {  task ->
-                if (task.isSuccessful) {
-                    val document = task.result
-                    course = if(document.toObject(Course::class.java) != null){
-                        document.toObject(Course::class.java)!!
-                    }
-                    else{
-                        Course("NULL", courseSection)
-                    }
-
-                    if (course != null) {
-                        viewCourseId.text = course.title + ":" + course.section
-                        viewCourseMode.text = course.mode.name
-                        var str = ""
-                        if (!course.instructors.isEmpty()){
-                            for (i in course.instructors) {
-                                str += " ${i.second},"
-                            }
-                        }
-                        else{
-                            str = "No Instructors Found"
-                        }
-
-                        viewInstructor.text = str
-                        displayStudents(studentTable, course.students)
-
-
-                        // Get the Course Health Stats for the past few days
-                        val oneDayBefore = Calendar.getInstance()
-                            oneDayBefore.add(Calendar.DAY_OF_YEAR, -1)
-                        val oneWeekBefore = Calendar.getInstance()
-                            oneWeekBefore.add(Calendar.DAY_OF_YEAR, -30)
-                        val oneMonthBefore = Calendar.getInstance()
-                            oneMonthBefore.add(Calendar.DAY_OF_YEAR, -365)
-
-                        val reportsRef = db.collection("healthReports")
-                        for (s in course.students) {
-                            val oneDayClassReports = reportsRef
-                                .whereEqualTo("userID", s.first).whereEqualTo("testedPositive", true)
-                                .whereGreaterThanOrEqualTo("date", Timestamp(oneDayBefore.time))
-                            val oneWeekClassReports = reportsRef
-                                .whereEqualTo("userID", s.first).whereEqualTo("testedPositive", true)
-                                .whereGreaterThanOrEqualTo("date", Timestamp(oneWeekBefore.time))
-                            val oneMonthClassReports = reportsRef
-                                .whereEqualTo("userID", s.first).whereEqualTo("testedPositive", true)
-                                .whereGreaterThanOrEqualTo("date", Timestamp(oneMonthBefore.time))
-
-                            oneWeekClassReports.get()
-                                .addOnSuccessListener { result ->
-                                    for (d in result.documents){
-                                        Log.i(TAG(), "Document: ${d}")
-                                        numCasesOneDay.add(d["userID"] as String)
-                                    }
-                                    Log.i(TAG(), "Successfully modified one day positive cases for course")
-                                    viewDailyCourseCases.text = numCasesOneDay.size.toString()
-                                }
-                                .addOnFailureListener { it ->
-                                    Log.i(TAG(), "Failed to open visits collection", it)
-                                }
-
-                            oneDayClassReports.get()
-                                .addOnSuccessListener { result ->
-                                    for (d in result.documents){
-                                        Log.i(TAG(), "Document: ${d}")
-                                        numCasesOneWeek.add(d["userID"] as String)
-                                    }
-                                    Log.i(TAG(), "Successfully modified one day positive cases for course")
-                                    viewWeeklyCourseCases.text = numCasesOneWeek.size.toString()
-                                }
-                                .addOnFailureListener { it ->
-                                    Log.i(TAG(), "Failed to open visits collection", it)
-                                }
-
-                            oneMonthClassReports.get()
-                                .addOnSuccessListener { result ->
-                                    for (d in result.documents){
-                                        Log.i(TAG(), "Document: ${d}")
-                                        numCasesOneMonth.add(d["userID"] as String)
-                                    }
-                                    Log.i(TAG(), "Successfully modified one day positive cases for course")
-                                    viewMonthlyCourseCases.text = numCasesOneMonth.size.toString()
-                                }
-                                .addOnFailureListener { it ->
-                                    Log.i(TAG(), "Failed to open visits collection", it)
-                                }
-                        }
-                    }
-                }
-                else{
-                    onFirestoreGetFailed("Failed to retrieve course info")
-                }
-            }
+        // display course information
+        ds.retrieveCourse(courseSection!!, ::displayCourseInfo)
     }
 
-    private fun displayStudents(studentTable: LinearLayout, students: MutableList<IdAndName>) {
+    public fun displayStudents(studentTable: LinearLayout, students: MutableList<IdAndName>) {
         val tableParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -239,5 +127,39 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
     override fun onNothingSelected(p0: AdapterView<*>?) {
         TODO("Not yet implemented")
 
+    }
+
+    public fun displayCourseInfo(course: Course){
+        viewCourseId.text = course.title + ":" + course.section
+        viewCourseMode.text = course.mode.name
+        var str = ""
+        if (course.instructors.isNotEmpty()){
+            for (i in course.instructors) {
+                str += " ${i.second},"
+            }
+        }
+        else{
+            str = "No Instructors Found"
+        }
+
+        viewInstructor.text = str
+        displayStudents(studentTable, course.students)
+
+        val users = course.instructors+course.students
+        ds.getPositiveReportsForUsersInPastNumDays(users, numCasesOneDay, 1, ::updateDailyCases, viewDailyCourseCases)
+        ds.getPositiveReportsForUsersInPastNumDays(users, numCasesOneWeek, 7, ::updateWeeklyCases, viewWeeklyCourseCases)
+        ds.getPositiveReportsForUsersInPastNumDays(users, numCasesOneMonth, 31, ::updateMonthlyCases, viewMonthlyCourseCases)
+    }
+
+    private fun updateDailyCases(view:TextView){
+        view.text = numCasesOneDay.size.toString()
+    }
+
+    private fun updateWeeklyCases(view:TextView){
+        view.text = numCasesOneWeek.size.toString()
+    }
+
+    private fun updateMonthlyCases(view:TextView){
+        view.text = numCasesOneMonth.size.toString()
     }
 }
