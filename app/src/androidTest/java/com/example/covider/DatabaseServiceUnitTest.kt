@@ -88,7 +88,7 @@ class DatabaseServiceUnitTest {
                 if (task.isSuccessful) {
                     val uid = task.result.user!!.uid
                     db.collection("users").document(uid).delete()
-                    auth.currentUser!!.delete()
+                    task.result.user!!.delete()
                     auth.signOut()
                     Log.i(TAG(),"Deleted test user ${user.email}")
 
@@ -201,6 +201,31 @@ class DatabaseServiceUnitTest {
         Assert.assertEquals(c.section, retrievedCourse!!.section)
         Assert.assertEquals(c.title, retrievedCourse!!.title)
         Assert.assertEquals(c.mode, retrievedCourse!!.mode)
+    }
+
+    @Test
+    fun retrieveCourseWithUsersTest(){
+        val section = testSection(2)
+        val instructors = mutableListOf(IdAndName("1", "Teacher1"))
+        val students = mutableListOf(IdAndName("2", "Student1"))
+        val c = Course(section = section, instructors = instructors, students = students)
+
+        db.collection("courses").document(section).set(c)
+            .addOnCompleteListener { result ->
+                if (result.isSuccessful){
+                    ds.retrieveCourse(section, ::retrieveTestCourse)
+                }
+                else{
+                    Log.e(TAG(), "tried to create course with section: ${c.section}")
+                }
+            }
+
+        Awaitility.await().until(courseIsRetrieved())
+        Assert.assertEquals(c.section, retrievedCourse!!.section)
+        Assert.assertEquals(c.title, retrievedCourse!!.title)
+        Assert.assertEquals(c.mode, retrievedCourse!!.mode)
+        Assert.assertEquals(c.instructors, retrievedCourse!!.instructors)
+        Assert.assertEquals(c.students, retrievedCourse!!.students)
     }
 
     @Test
