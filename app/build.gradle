@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'com.google.gms.google-services'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+    id 'jacoco'
 }
 
 android {
@@ -22,11 +23,10 @@ android {
         def appId = "new-covider-jjvsd"
 
         debug {
-            buildConfigField "String", "MONGODB_REALM_APP_ID", "\"${appId}\""
+            testCoverageEnabled true
         }
 
         release {
-            buildConfigField "String", "MONGODB_REALM_APP_ID", "\"${appId}\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -42,6 +42,12 @@ android {
         viewBinding true
     }
     testOptions {
+        unitTests.all {
+            jacoco {
+                includeNoLocationClasses = true
+            }
+        }
+        unitTests.returnDefaultValues = true
         animationsDisabled true
     }
 }
@@ -88,4 +94,24 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:18.0.2'
 
     androidTestImplementation 'org.awaitility:awaitility:3.1.6'
+}
+
+// added from https://about.codecov.io/blog/code-coverage-for-android-development-using-kotlin-jacoco-github-actions-and-codecov/
+task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
+
+    reports {
+        xml
+        html
+    }
+
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
+    def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: fileFilter)
+    def mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories.setFrom(files([mainSrc]))
+    classDirectories.setFrom(files([debugTree]))
+    executionData.setFrom(fileTree(dir: "$buildDir", includes: [
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/code-coverage/connected/*coverage.ec"
+    ]))
 }
