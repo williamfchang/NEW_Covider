@@ -16,6 +16,7 @@ import com.example.covider.models.Visit
 import com.example.covider.services.DatabaseService
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
@@ -336,42 +337,56 @@ class ProfileFragment : Fragment() {
     }
 
 
-    private fun getAndDisplayContactVisits(uid: String, recentBuildings: HashSet<String>) {
-        val oneDayBefore = Calendar.getInstance()
-        oneDayBefore.add(Calendar.DAY_OF_YEAR, -1)
+    // make static
+    companion object {
+        fun queryForContact(visitsRef: CollectionReference, recentBuildings: HashSet<String>, uid: String,
+                    callback: (ArrayList<Visit>) -> Unit)
+        {
+            val oneDayBefore = Calendar.getInstance()
+            oneDayBefore.add(Calendar.DAY_OF_YEAR, -1)
 
+            // get all global visits in the past day to those buildings that were POSITIVE
+            // ...unless empty, then just call displayContactTracing with an empty array
+            if (recentBuildings.isEmpty()) {
+                Log.i(TAG(), "No recent buildings found, no contact tracing query used")
+                callback(ArrayList<Visit>())
+            }
+            else {
+                val contactVisitsQuery = visitsRef
+                    .whereEqualTo("userWasPositive", true)
+                    .whereGreaterThanOrEqualTo("endTime", Timestamp(oneDayBefore.time))
+                    .whereIn("buildingID", recentBuildings.toList())
+
+                // Pull these visits out and pass to display function
+                var contactVisits = ArrayList<Visit>()
+
+                contactVisitsQuery.get()
+                    .addOnSuccessListener { result ->
+                        for (doc in result) {
+                            // Only add if it's not yourself
+                            if ((doc.get("userID") as String) != uid) {
+                                contactVisits.add(doc.toObject())
+                            }
+                        }
+
+                        Log.i(TAG(), "Successfully found close contacts: $contactVisits")
+
+                        callback(contactVisits)
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.w(TAG(), "Error getting close contact visits.", exception)
+
+                        callback(ArrayList<Visit>())
+                    }
+            }
+        }
+    }
+
+    private fun getAndDisplayContactVisits(uid: String, recentBuildings: HashSet<String>) {
         val visitsRef = db.collection("visits")
 
-        // get all global visits in the past day to those buildings that were POSITIVE
-        // ...unless empty, then just call displayContactTracing with an empty array
-        if (recentBuildings.isEmpty()) {
-            Log.i(TAG(), "No recent buildings found, no contact tracing query used")
-            displayContactTracing(ArrayList<Visit>())
-        }
-        else {
-            val contactVisitsQuery = visitsRef
-                .whereEqualTo("userWasPositive", true)
-                .whereGreaterThanOrEqualTo("endTime", Timestamp(oneDayBefore.time))
-                .whereIn("buildingID", recentBuildings.toList())
-
-            // Pull these visits out and pass to display function
-            var contactVisits = ArrayList<Visit>()
-
-            contactVisitsQuery.get()
-                .addOnSuccessListener { result ->
-                    for (doc in result) {
-                        // Only add if it's not yourself
-                        if ((doc.get("userID") as String) != uid) {
-                            contactVisits.add(doc.toObject())
-                        }
-                    }
-
-                    Log.i(TAG(), "Successfully found close contacts: $contactVisits")
-                    displayContactTracing(contactVisits)
-                }
-                .addOnFailureListener { exception ->
-                    Log.w(TAG(), "Error getting close contact visits.", exception)
-                }
+        val contactVisits = queryForContact(visitsRef, recentBuildings, uid) { contactVisits ->
+            displayContactTracing(contactVisits)
         }
     }
 
