@@ -55,7 +55,7 @@ class CreateAccountActivity : AppCompatActivity() {
             isInstructor = isChecked
         }
 
-        // Initialize Firebase Auth
+        // Initialize Firebase
         auth = Firebase.auth
         db = FirebaseFirestore.getInstance()
 
@@ -117,6 +117,7 @@ class CreateAccountActivity : AppCompatActivity() {
                                 } else {
                                     Student(name, email, uscID)
                                 }
+                    userdata.uid = user!!.uid
 
                     db.collection("users").document(user!!.uid).set(userdata)
 
