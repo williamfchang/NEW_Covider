@@ -3,6 +3,7 @@ package com.example.covider
 import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.launchActivity
+import androidx.test.espresso.Espresso.onData
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.PerformException
@@ -15,7 +16,7 @@ import androidx.test.espresso.contrib.RecyclerViewActions
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.*
 import org.junit.After
 import org.junit.Before
 import org.junit.BeforeClass
@@ -26,6 +27,7 @@ import org.junit.runner.RunWith
 /**
  * Testing Map View
  */
+
 
 
 @RunWith(AndroidJUnit4::class)
@@ -52,6 +54,7 @@ class MapAndBuildingListTest {
         }
     }
 
+
     @Test(expected = PerformException::class)
     fun lookForNonexistentBuilding() {
         launchActivity<BuildingsActivity>().use { scenario ->
@@ -62,30 +65,37 @@ class MapAndBuildingListTest {
     }
 
     @Test
-    fun lookForCommonBuildings() {
+    fun clickOnBuildingEntry() {
         launchActivity<BuildingsActivity>().use { scenario ->
-            val buildings = arrayOf("TCC", "SGM", "LVL", "SAL")
+            Thread.sleep(delay)
 
-            // check for a few buildings
-            for (currBuilding in buildings) {
-                onView(withId(R.id.building_list_view)).perform(
-                    RecyclerViewActions.scrollTo<RecyclerView.ViewHolder>(
-                        hasDescendant(withText(containsString(currBuilding)))
-                    )
-                )
-            }
+            onData(anything()).inAdapterView(withId(R.id.building_list_view))
+                .atPosition(0).perform(click())
+
+            // Check if we went to building details page
+            onView(withId(R.id.building_name_label)).check(matches(isDisplayed()))
+
+            Thread.sleep(1000)
         }
     }
 
     @Test
-    fun clickOnBuildingEntry() {
-
+    fun clickOnAddVisitInBuildingInfo() {
         launchActivity<BuildingsActivity>().use { scenario ->
-            onView(withId(R.id.building_list_view)).perform(
-                RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click())
-            )
+            Thread.sleep(delay)
+
+            onData(anything()).inAdapterView(withId(R.id.building_list_view))
+                .atPosition(0).perform(click())
+
+            // Check if we went to building details page
+            onView(withId(R.id.building_name_label)).check(matches(isDisplayed()))
+            onView(withId(R.id.building_id_label)).check(matches(withText("LVL")))
 
             Thread.sleep(1000)
+
+            // Now click on add visits
+            onView(withId(R.id.button_add_building_visit)).perform(click())
+            onView(withId(R.id.button_add_visit)).check(matches(isDisplayed()))
         }
     }
 }
