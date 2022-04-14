@@ -16,8 +16,8 @@ import com.google.firebase.ktx.Firebase
 
 class BuildingsActivity : AppCompatActivity() {
     private lateinit var listView: ListView
-    private var buildings = HashMap<String, Building>()
-    private var buildingsByPriority = ArrayList<String>()
+    var buildings = HashMap<String, Building>()
+    var buildingsByPriority = ArrayList<String>()
 
     // firestore
     private val db = Firebase.firestore
@@ -71,27 +71,38 @@ class BuildingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun insertBuildingsByPriority () {
-        var priority2 = ArrayList<String>()
-        var priority1 = ArrayList<String>()
-        for ((bcode, b) in buildings) {
-            val bId = when (b.id) {
-                null -> "N/A"
-                else -> b.id
-            }
-            val bColonAndName = when (b.name) {
-                null -> ""
-                else -> ": ${b.name}"
+    // make function static
+    companion object {
+        fun sortBuildings(buildingsMap: HashMap<String, Building>): ArrayList<String> {
+            var priority2 = ArrayList<String>()
+            var priority1 = ArrayList<String>()
+            for ((bcode, b) in buildingsMap) {
+                val bId = when (b.id) {
+                    null -> "N/A"
+                    else -> b.id
+                }
+                val bColonAndName = when (b.name) {
+                    null -> ""
+                    else -> ": ${b.name}"
+                }
+
+                if (b.priority == 2) {
+                    priority2.add("$bId [*]$bColonAndName")
+                } else if (b.priority == 1) {
+                    priority1.add("$bId$bColonAndName")
+                }
             }
 
-            if (b.priority == 2) {
-                priority2.add("$bId [*]$bColonAndName")
-            } else if (b.priority == 1) {
-                priority1.add("$bId$bColonAndName")
-            }
+            var out = ArrayList<String>()
+            out.addAll(priority2)
+            out.addAll(priority1)
+
+            return out
         }
-        buildingsByPriority.addAll(priority2)
-        buildingsByPriority.addAll(priority1)
+    }
+
+    fun insertBuildingsByPriority () {
+        buildingsByPriority = sortBuildings(buildings)
 
         listView.setOnItemClickListener { adapterView, view, i, l ->
             // TODO: Want to open building info tab first, but do this for testing
