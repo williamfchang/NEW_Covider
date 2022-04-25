@@ -32,7 +32,7 @@
     <string name="select_class_days">Select Recurring Class Days</string>
     <string name="select_safety_measures">Please select which COVID safety measures are taken at this location</string>
     <string name="is_hand_sanitizer">Is there hand sanitizer provided?</string>
-    <string name="is_wearing_masks">Are most people wearing masks?</string>
+    <string name="is_wearing_masks">How many people are wearing masks?</string>
     <string name="see_list">See List of Buildings</string>
     <string name="risk_level">Risk Level</string>
     <string name="entry_requirements">Entry Requirements</string>
