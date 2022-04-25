@@ -9,7 +9,7 @@ data class Building (
     val name: String? = null,
     val coordinates: GeoPoint? = null,
     val address: String? = null,
-    val priority: Int = 0,
+    var priority: Int = 0,
     val risk: Int = 1000
 ) : Serializable
 
