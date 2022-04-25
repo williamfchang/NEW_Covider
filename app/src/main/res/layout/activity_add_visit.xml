@@ -77,26 +77,77 @@
                 android:text="@string/class_visit"
                 android:textSize="16sp" />
 
-            <EditText
-                android:id="@+id/input_course_code"
+            <LinearLayout
+                android:id="@+id/course_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/class_code"
-                android:inputType="text" />
+                android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/input_course_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Enter section id with format 12345"
-                android:inputType="number" />
+                <EditText
+                    android:id="@+id/input_course_code"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/class_code"
+                    android:inputType="text" />
+
+                <EditText
+                    android:id="@+id/input_course_section"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter section id with format 12345"
+                    android:inputType="number" />
+
+                <TextView
+                    android:id="@+id/class_days_label"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/select_class_days"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/checkBoxMonday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Monday" />
+
+                <CheckBox
+                    android:id="@+id/checkBoxTuesday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tuesday" />
+
+                <CheckBox
+                    android:id="@+id/checkBoxWednesday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Wednesday" />
+
+                <CheckBox
+                    android:id="@+id/checkBoxThursday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Thursday" />
+
+                <CheckBox
+                    android:id="@+id/checkBoxFriday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Friday" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/button_add_visit"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:padding="12dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="5dp"
                 android:text="@string/add_visit" />
 
 

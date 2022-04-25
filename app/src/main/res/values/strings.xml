@@ -29,6 +29,7 @@
     <string name="select_building">Select Building</string>
     <string name="select_start_time">Select a Start Time</string>
     <string name="select_end_time">Select an End Time</string>
+    <string name="select_class_days">Select Recurring Class Days</string>
     <string name="see_list">See List of Buildings</string>
     <string name="risk_level">Risk Level</string>
     <string name="entry_requirements">Entry Requirements</string>

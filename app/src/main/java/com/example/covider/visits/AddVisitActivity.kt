@@ -22,8 +22,14 @@ class AddVisitActivity : AppCompatActivity() {
     private lateinit var buildingSpinner: Spinner
     private lateinit var startPicker : TimePicker
     private lateinit var endPicker : TimePicker
+    private lateinit var courseLayout: LinearLayout
     private lateinit var courseSwitch: Switch
     private lateinit var courseSection: EditText
+    private lateinit var checkBoxM: CheckBox
+    private lateinit var checkBoxT: CheckBox
+    private lateinit var checkBoxW: CheckBox
+    private lateinit var checkBoxTh: CheckBox
+    private lateinit var checkBoxF: CheckBox
     private lateinit var addButton: Button
 
     private lateinit var building: String
@@ -59,23 +65,25 @@ class AddVisitActivity : AppCompatActivity() {
         // Set up time pickers
         setTimePickerDefaults()
 
-        // Set up switch and textfield visibility
-        courseTitle = findViewById(R.id.input_course_code)
-        courseTitle.visibility = View.INVISIBLE
-
-        courseSection = findViewById(R.id.input_course_section)
-        courseSection.visibility = View.INVISIBLE
-
-        courseSwitch = findViewById(R.id.switch_class)
+        // Set up course defaults
+        setCourseDefaults()
         courseSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val params = courseLayout.layoutParams
             if (isChecked) {
-                courseTitle.visibility = View.VISIBLE
-                courseSection.visibility = View.VISIBLE
+                courseLayout.visibility = View.VISIBLE
+                params.height = LinearLayout.LayoutParams.WRAP_CONTENT
             } else {
-                courseTitle.visibility = View.INVISIBLE
-                courseSection.visibility = View.INVISIBLE
+                courseLayout.visibility = View.INVISIBLE
+                params.height = 0
             }
+            courseLayout.layoutParams = params
         }
+
+        checkBoxM = findViewById(R.id.checkBoxMonday)
+        checkBoxT = findViewById(R.id.checkBoxTuesday)
+        checkBoxW = findViewById(R.id.checkBoxWednesday)
+        checkBoxTh = findViewById(R.id.checkBoxThursday)
+        checkBoxF = findViewById(R.id.checkBoxFriday)
 
         // Set up add visit button
         addButton = findViewById(R.id.button_add_visit)
@@ -128,7 +136,7 @@ class AddVisitActivity : AppCompatActivity() {
                                             Log.i(TAG(), "Didn't find course with section: $section, so uploading new course")
 
                                             // create a new course with a new student
-                                            var c = Course(section, title)
+                                            var c = Course(section, title, getDays())
                                             if (user.role == CoviderEnums.UserType.STUDENT){
                                                 c.students.add(IdAndName(authUser.uid, user.name))
                                             }
@@ -163,7 +171,7 @@ class AddVisitActivity : AppCompatActivity() {
         return ts
     }
 
-    private fun setTimePickerDefaults(){
+    private fun setTimePickerDefaults() {
         startPicker = findViewById(R.id.picker_start_time)
         startPicker.setIs24HourView(true);
         startPicker.hour = 12
@@ -180,6 +188,21 @@ class AddVisitActivity : AppCompatActivity() {
         c[Calendar.HOUR_OF_DAY] = 13
         c[Calendar.MINUTE] = 30
         endTime = Timestamp(c.time)
+    }
+
+    private fun setCourseDefaults() {
+        courseTitle = findViewById(R.id.input_course_code)
+        courseSection = findViewById(R.id.input_course_section)
+        courseLayout = findViewById(R.id.course_layout)
+        courseSwitch = findViewById(R.id.switch_class)
+        courseLayout.visibility = View.INVISIBLE
+        val params = courseLayout.layoutParams
+        params.height = 0
+        courseLayout.layoutParams = params
+    }
+    private fun getDays(): List<Boolean> {
+        return listOf(checkBoxM.isChecked, checkBoxT.isChecked,
+            checkBoxW.isChecked, checkBoxTh.isChecked, checkBoxF.isChecked)
     }
 
     private fun getIndex(spinner: Spinner, string : String): Int {
