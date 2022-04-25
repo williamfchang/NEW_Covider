@@ -9,9 +9,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.covider.models.*
 import com.example.covider.services.DatabaseService
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener{
     private lateinit var ds: DatabaseService
+    private lateinit var db: FirebaseFirestore
     private lateinit var viewCourseId: TextView
     private lateinit var viewCourseMode: TextView
     private lateinit var viewInstructor: TextView
@@ -22,7 +25,7 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
     private lateinit var viewMonthlyCourseCases: TextView
     private lateinit var spinner: Spinner
     private lateinit var updateCourseModeButton: Button
-    private lateinit var tmpCourseMode: CoviderEnums.ClassMode
+    private lateinit var newCourseMode: CoviderEnums.ClassMode
 
     private val numCasesOneDay: MutableSet<String> =  mutableSetOf()
     private val numCasesOneWeek: MutableSet<String> = mutableSetOf()
@@ -32,8 +35,8 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_course_info)
 
-        var userRole = intent.getStringExtra("userRole")
-        var courseSection = intent.getStringExtra("courseID")
+        val userRole = intent.getStringExtra("userRole")
+        val courseSection = intent.getStringExtra("courseID")
 
         viewCourseId = findViewById(R.id.view_course_id)
         viewCourseMode = findViewById(R.id.course_node)
@@ -51,10 +54,11 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
             android.R.layout.simple_spinner_item, CoviderEnums.ClassMode.values()
         )
         spinner.adapter = adapter
+        spinner.onItemSelectedListener = this
 
-//        updateCourseModeButton.setOnClickListener {
-//            viewCourseMode.text = tmpCourseMode.name
-//        }
+        updateCourseModeButton.setOnClickListener {
+            updateCourseMode()
+        }
 
         // if you are not an instructor, you don't have access to these values
         if (userRole != CoviderEnums.UserType.INSTRUCTOR.name){
@@ -66,12 +70,13 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
 
         // Initialize database service
         ds = DatabaseService(FirebaseFirestore.getInstance())
+        db = Firebase.firestore
 
         // display course information
         ds.retrieveCourse(courseSection!!, ::displayCourseInfo)
     }
 
-    public fun displayStudents(studentTable: LinearLayout, students: MutableList<IdAndName>) {
+    private fun displayStudents(studentTable: LinearLayout, students: MutableList<IdAndName>) {
         val tableParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -109,29 +114,32 @@ class CourseViewActivity : AppCompatActivity(), AdapterView.OnItemSelectedListen
         }
     }
 
-    private fun onFirestoreGetFailed(errorMsg: String) {
-        Log.e(TAG(), errorMsg)
-        Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
-    }
-
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        tmpCourseMode = CoviderEnums.ClassMode.valueOf(p0?.getItemAtPosition(p2) as String)
-        // update the mode of the course in the database
-        Log.i(TAG(), tmpCourseMode.name)
+        newCourseMode = p0?.getItemAtPosition(p2) as CoviderEnums.ClassMode
     }
-
-//    private fun updateMode(mode: CoviderEnums.ClassMode){
-//
-//    }
 
     override fun onNothingSelected(p0: AdapterView<*>?) {
         TODO("Not yet implemented")
-
     }
 
-    public fun displayCourseInfo(course: Course){
-        viewCourseId.text = course.title + ":" + course.section
+    private fun updateCourseMode(){
+        if (viewCourseMode.text != newCourseMode.name) {
+            viewCourseMode.text = newCourseMode.name
+            val courseSection = viewCourseId.text.split(":")[1]
+
+            // update the mode of the course in the database
+            db.collection("courses").document(courseSection).update("mode", newCourseMode)
+            Log.i(TAG(), "Mode of $courseSection was updated to ${newCourseMode.name}")
+        }
+        else{
+            Toast.makeText(this, "Course mode unchanged", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun displayCourseInfo(course: Course){
+        viewCourseId.text = "${course.title}:${course.section}"
         viewCourseMode.text = course.mode.name
+        spinner.setSelection(course.mode.ordinal)
         var str = ""
         if (course.instructors.isNotEmpty()){
             for (i in course.instructors) {
