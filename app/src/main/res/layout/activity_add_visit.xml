@@ -26,7 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/select_building"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="16sp" />
 
             <Spinner
@@ -41,7 +41,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/select_start_time"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="16sp" />
 
             <TimePicker
@@ -51,14 +51,14 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="-20dp"
                 android:layout_marginBottom="-20dp"
-                android:timePickerMode="spinner"/>
+                android:timePickerMode="spinner" />
 
             <TextView
                 android:id="@+id/end_time_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/select_end_time"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="16sp" />
 
             <TimePicker
@@ -70,11 +70,46 @@
                 android:layout_marginBottom="-20dp"
                 android:timePickerMode="spinner" />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/select_safety_measures"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:orientation="vertical">
+
+                <Switch
+                    android:id="@+id/switch_sanitizer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/is_hand_sanitizer"
+                    android:textColor="#80000000"
+                    android:textSize="16sp" />
+
+                <Switch
+                    android:id="@+id/switch_masks"
+                    android:layout_marginTop="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/is_wearing_masks"
+                    android:textColor="#80000000"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
             <Switch
                 android:id="@+id/switch_class"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/class_visit"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="16sp" />
 
             <LinearLayout
@@ -103,12 +138,12 @@
 
                 <TextView
                     android:id="@+id/class_days_label"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:text="@string/select_class_days"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textSize="16sp" />
 
                 <CheckBox

@@ -22,6 +22,10 @@ class AddVisitActivity : AppCompatActivity() {
     private lateinit var buildingSpinner: Spinner
     private lateinit var startPicker : TimePicker
     private lateinit var endPicker : TimePicker
+
+    private lateinit var sanitizerSwitch: Switch
+    private lateinit var maskSwitch: Switch
+
     private lateinit var courseLayout: LinearLayout
     private lateinit var courseSwitch: Switch
     private lateinit var courseSection: EditText
@@ -65,6 +69,10 @@ class AddVisitActivity : AppCompatActivity() {
         // Set up time pickers
         setTimePickerDefaults()
 
+        // Set up safety measure switches
+        sanitizerSwitch = findViewById(R.id.switch_sanitizer)
+        maskSwitch = findViewById(R.id.switch_masks)
+
         // Set up course defaults
         setCourseDefaults()
         courseSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -104,6 +112,8 @@ class AddVisitActivity : AppCompatActivity() {
 
                 // Add visit to Firebase
                 db.collection("visits").add(visit)
+
+                // TODO: Add safety measure information to building on Firebase
 
                 // if visit is a course, add course to Firebase
                 // first get the user to determine which list to add to
