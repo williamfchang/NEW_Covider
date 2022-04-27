@@ -108,70 +108,91 @@ class AddVisitActivity : AppCompatActivity() {
                 val title = courseTitle.text.toString()
                 val section = courseSection.text.toString()
                 val visit = Visit(startTime, endTime, buildingID.toString(), userID, false, section)
+
                 VisitList.addVisit(visit)
 
                 // Add visit to Firebase
                 db.collection("visits").add(visit)
 
-                // TODO: Add safety measure information to building on Firebase
+
+                // Get user survey building safety info
+                val hasSanitizer = sanitizerSwitch.isChecked
+                val maskPercentage = maskSeekBar.progress
+
+                // Create building report object and add to Firebase
+                val newReport = BuildingReport(buildingID, startTime, hasSanitizer, maskPercentage/100.0, userID)
+                db.collection("buildingReports").add(newReport)
+
 
                 // if visit is a course, add course to Firebase
                 // first get the user to determine which list to add to
                 if (courseSwitch.isChecked && title.isNotBlank() && section.isNotBlank()){
-
                     var authUser = auth.currentUser
                     val userDocRef = db.collection("users").document(authUser!!.uid)
                     userDocRef.get()
                         .addOnCompleteListener {
-                            if (it.isSuccessful){
-                                var d = it.result
-                                user = d.toObject(User::class.java)!!
-
-                                // check to see if the course already exists
-                                val courseDocRef = db.collection("courses").document(section)
-                                courseDocRef.get()
-                                    .addOnCompleteListener { task ->
-                                        if (task.isSuccessful && task.result.exists()) {
-                                            Log.i(TAG(), "Found course with section: $section! Updating user lists...")
-
-                                            // update the appropriate list in the course
-                                            if (user.role == CoviderEnums.UserType.STUDENT){
-                                                courseDocRef.update("students",FieldValue.arrayUnion(IdAndName(authUser.uid, user.name)))
-                                            }
-                                            else if (user.role == CoviderEnums.UserType.INSTRUCTOR){
-                                                courseDocRef.update("instructors",FieldValue.arrayUnion(IdAndName(authUser.uid, user.name)))
-                                            }
-                                        }
-                                        else{
-                                            Log.i(TAG(), "Didn't find course with section: $section, so uploading new course")
-
-                                            // create a new course with a new student
-                                            var c = Course(section, title, getDays())
-                                            if (user.role == CoviderEnums.UserType.STUDENT){
-                                                c.students.add(IdAndName(authUser.uid, user.name))
-                                            }
-                                            else if (user.role == CoviderEnums.UserType.INSTRUCTOR){
-                                                c.instructors.add(IdAndName(authUser.uid, user.name))
-                                            }
-
-                                            // upload the new course
-                                            db.collection("courses").document(section).set(c)
-                                        }
-                                    }
+                            if (it.isSuccessful) {
+                                user = it.result.toObject(User::class.java)!!
+                                addCourseToFirebase(user, section, title)
                             }
                         }
-
-                    db.collection("users").document(authUser!!.uid).update("courses",FieldValue.arrayUnion(section))
                 }
 
                 // Return to main page
                 val intent = Intent(this, MainActivity::class.java)
                 intent.putExtra("frag", "visits")
-                // TODO open main activity to visits frag
                 startActivity(intent)
             }
         }
     }
+
+    private fun addCourseToFirebase(user: User, section: String, title: String) {
+        // check to see if the course already exists
+        val courseDocRef = db.collection("courses").document(section)
+        courseDocRef.get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful && task.result.exists()) {
+                    Log.i(
+                        TAG(),
+                        "Found course with section: $section! Updating user lists..."
+                    )
+
+                    // update the appropriate list in the course
+                    if (user.role == CoviderEnums.UserType.STUDENT) {
+                        courseDocRef.update(
+                            "students",
+                            FieldValue.arrayUnion(IdAndName(user.uid, user.name))
+                        )
+                    } else if (user.role == CoviderEnums.UserType.INSTRUCTOR) {
+                        courseDocRef.update(
+                            "instructors",
+                            FieldValue.arrayUnion(IdAndName(user.uid, user.name))
+                        )
+                    }
+                } else {
+                    Log.i(
+                        TAG(),
+                        "Didn't find course with section: $section, so uploading new course"
+                    )
+
+                    // create a new course with a new student
+                    var c = Course(section, title, getDays())
+                    if (user.role == CoviderEnums.UserType.STUDENT) {
+                        c.students.add(IdAndName(user.uid, user.name))
+                    } else if (user.role == CoviderEnums.UserType.INSTRUCTOR) {
+                        c.instructors.add(IdAndName(user.uid, user.name))
+                    }
+
+                    // upload the new course
+                    db.collection("courses").document(section).set(c)
+                }
+            }
+
+        // add this course to the user's list of courses (arrayUnion adds this new section to Firebase's current array)
+        db.collection("users").document(user.uid).update("courses",FieldValue.arrayUnion(section))
+
+    }
+
 
     private fun getTime(p: TimePicker) : Timestamp {
         val c = Calendar.getInstance()
