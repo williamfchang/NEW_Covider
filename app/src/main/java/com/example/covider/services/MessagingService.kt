@@ -6,13 +6,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
-import com.example.covider.MainActivity
 import com.example.covider.R
 import com.example.covider.models.User
 import com.google.firebase.auth.ktx.auth
@@ -21,7 +16,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.firebase.messaging.ktx.messaging
-import org.json.JSONObject
 
 
 class MessagingService : FirebaseMessagingService(){
@@ -123,47 +117,6 @@ class MessagingService : FirebaseMessagingService(){
 
         // store the users current FCM token for notifications
         db.collection("users").document(currUserID).update("token", s)
-    }
-
-    public fun publishToCourse(context: Context, courseID: String, msg: String){
-        val endpoint = "https://fcm.googleapis.com/fcm/send"
-        val apikey = "AAAAOVbHT9Q:APA91bG5KWf9LcXMIbUX_xVpx86kdWQVyjamiZMxiHKN8Zc3WHBMN72oSdOQNzlbKbhlmW35d2BQwueDGjDzphrk6rfXGKYT2AgrnepXytvFtjQ_URaCh1-v5vxvFCGSNU3sjll1EKRB"//"AIzaSyAwQ_Y_4b7ZCdxMvvl4XoKL4aTQapY21c8"
-        val queue = Volley.newRequestQueue(context)
-
-        val notification = JSONObject()
-        notification.put("body", msg)
-        notification.put("title", "Course $courseID")
-
-        val message = JSONObject()
-        message.put("to", "/topics/$courseID")
-        message.put("notification", notification)
-
-        val body = JSONObject()
-        body.put("message", message)
-
-        Log.i(TAG, message.toString())
-
-        val request = object: JsonObjectRequest(Method.POST, endpoint, message,
-            Response.Listener { response ->
-                if (response != null) {
-                    Log.e("Your Array Response", response.toString())
-                } else {
-                    Log.e("Your Array Response", "Data Null")
-                }
-            },
-            Response.ErrorListener { error ->
-                Log.e("error is ", "" + error)
-            }
-        ) {
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                headers["authorization"] = "key=$apikey"
-                return headers
-            }
-        }
-
-        queue.add(request)
     }
 
     companion object {
