@@ -12,12 +12,14 @@ import androidx.fragment.app.Fragment
 import com.google.common.primitives.UnsignedBytes.toInt
 
 import com.example.covider.models.Building
+import com.example.covider.models.User
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.firebase.auth.ktx.auth
 
 // Move firebase stuff to DatabaseService later
 import com.google.firebase.ktx.Firebase
@@ -30,14 +32,18 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 
     // Firestore
     private val db = Firebase.firestore
+    private val auth = Firebase.auth
 
     // member vars
+    private var favoriteBuildings = listOf<String>()
+
     var buildings = ArrayList<Building>()
     private var buildingMarkers = ArrayList<Marker>() // public so buildings can be accessed elsewhere
     private val priority1MinZoom = 16.5
     private lateinit var listButton: Button
 
     private var buildingsLoaded = false
+
 
     private val callback = OnMapReadyCallback { map ->
         /**
@@ -57,8 +63,12 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
         map.setLatLngBoundsForCameraTarget(uscBounds)
         map.setMinZoomPreference(14.0f)
 
-        // Draw buildings on map
-        getAndDrawBuildings(map)
+        // Get favorite / recurring class buildings
+        getFavoriteBuildings(map) {
+            // Draw buildings on map
+            getAndDrawBuildings(map)
+        }
+
 
         // Set listener to zoom so we can draw markers based on zoom
         map.setOnCameraMoveListener { updateMarkersOnZoom(map) }
@@ -86,6 +96,24 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
         super.onViewCreated(view, savedInstanceState)
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
+    }
+
+
+    // function to get favorite buildings so we know which ones to mark as yellow on map
+    // with callback so we know when we can create the markers
+    private fun getFavoriteBuildings(map: GoogleMap, onSuccess: (GoogleMap) -> Unit) {
+        // Firebase stuff to get favorite buildings
+        val userID = auth.currentUser!!.uid
+        val userRef = db.collection("users").document(userID)
+
+        userRef.get().addOnSuccessListener { result ->
+            // Store favorite buildings in member var
+            val userObj = result.toObject<User>()
+            favoriteBuildings = userObj!!.favoriteBuildings
+
+            // Call callback function
+            onSuccess(map)
+        }
     }
 
     // -- map interaction -- //
@@ -130,7 +158,15 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
                 .addOnSuccessListener { result ->
                     // loop through all building docs to create Building object
                     for (doc in result) {
-                        buildings.add(doc.toObject<Building>())
+                        val newBuilding = doc.toObject<Building>()
+
+                        // Check if this building is in favoriteBuildings
+                        if (favoriteBuildings.contains(newBuilding.id)) {
+                            newBuilding.priority = 3
+                        }
+
+                        // add to buildings array
+                        buildings.add(newBuilding)
                     }
 
                     buildingsLoaded = true

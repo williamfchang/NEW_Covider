@@ -24,7 +24,7 @@ class AddVisitActivity : AppCompatActivity() {
     private lateinit var endPicker : TimePicker
 
     private lateinit var sanitizerSwitch: Switch
-    private lateinit var maskSwitch: Switch
+    private lateinit var maskSeekBar: SeekBar
 
     private lateinit var courseLayout: LinearLayout
     private lateinit var courseSwitch: Switch
@@ -71,7 +71,7 @@ class AddVisitActivity : AppCompatActivity() {
 
         // Set up safety measure switches
         sanitizerSwitch = findViewById(R.id.switch_sanitizer)
-        maskSwitch = findViewById(R.id.switch_masks)
+        maskSeekBar = findViewById(R.id.seekBar_masks)
 
         // Set up course defaults
         setCourseDefaults()
