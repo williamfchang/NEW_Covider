@@ -136,7 +136,7 @@ class AddVisitActivity : AppCompatActivity() {
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
                                 user = it.result.toObject<User>()!!
-                                addCourseToFirebase(user, section, title, buildingID)
+                                addCourseToFirebase(user, section, title, buildingID, startTime!!, endTime!!)
 
                                 // subscribe the device to notifications for this course
                                 Log.i(TAG(), "going into ms")
@@ -153,7 +153,7 @@ class AddVisitActivity : AppCompatActivity() {
         }
     }
 
-    private fun addCourseToFirebase(user: User, section: String, title: String, buildingID: String) {
+    private fun addCourseToFirebase(user: User, section: String, title: String, buildingID: String, startTime: Timestamp, endTime: Timestamp) {
         // check to see if the course already exists
         val courseDocRef = db.collection("courses").document(section)
         courseDocRef.get()
@@ -183,7 +183,7 @@ class AddVisitActivity : AppCompatActivity() {
                     )
 
                     // create a new course with a new student
-                    var c = Course(section, title, buildingID, getDays())
+                    var c = Course(section, title, buildingID, getDays(), startTime, endTime)
                     if (user.role == CoviderEnums.UserType.STUDENT) {
                         c.students.add(IdAndName(user.uid, user.name))
                     } else if (user.role == CoviderEnums.UserType.INSTRUCTOR) {
