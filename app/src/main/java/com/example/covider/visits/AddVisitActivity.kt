@@ -10,6 +10,7 @@ import com.example.covider.MainActivity
 import com.example.covider.R
 import com.example.covider.TAG
 import com.example.covider.models.*
+import com.example.covider.services.MessagingService
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -44,6 +45,7 @@ class AddVisitActivity : AppCompatActivity() {
     // firebase
     private val auth = Firebase.auth
     private val db = Firebase.firestore
+    private val ms = MessagingService()
 
     // user model needed for adding Course
     private lateinit var user: User
@@ -126,6 +128,10 @@ class AddVisitActivity : AppCompatActivity() {
                             if (it.isSuccessful){
                                 var d = it.result
                                 user = d.toObject(User::class.java)!!
+
+                                // subscribe the device to notifications for this course
+                                Log.i("AddVisitActivity", "going into ms")
+                                ms.subscribeToCourse(section)
 
                                 // check to see if the course already exists
                                 val courseDocRef = db.collection("courses").document(section)

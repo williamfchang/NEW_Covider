@@ -90,6 +90,11 @@ dependencies {
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation 'com.google.firebase:firebase-firestore-ktx'
 
+    // Firebase Cloud Messaging (Kotlin)
+    implementation 'com.google.firebase:firebase-messaging-ktx'
+    implementation 'com.android.volley:volley:1.2.1'
+
+
     // Google maps import
     implementation 'com.google.android.gms:play-services-maps:18.0.2'
 
