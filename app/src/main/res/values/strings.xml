@@ -36,6 +36,7 @@
     <string name="see_list">See List of Buildings</string>
     <string name="risk_level">Risk Level</string>
     <string name="entry_requirements">Entry Requirements</string>
+    <string name="mask_recommendation">Masks are recommended but not required</string>
 
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
