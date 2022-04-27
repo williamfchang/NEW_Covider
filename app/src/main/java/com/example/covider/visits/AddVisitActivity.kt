@@ -14,6 +14,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import java.util.*
 
@@ -132,8 +133,8 @@ class AddVisitActivity : AppCompatActivity() {
                     userDocRef.get()
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
-                                user = it.result.toObject(User::class.java)!!
-                                addCourseToFirebase(user, section, title)
+                                user = it.result.toObject<User>()!!
+                                addCourseToFirebase(user, section, title, buildingID)
                             }
                         }
                 }
@@ -146,7 +147,7 @@ class AddVisitActivity : AppCompatActivity() {
         }
     }
 
-    private fun addCourseToFirebase(user: User, section: String, title: String) {
+    private fun addCourseToFirebase(user: User, section: String, title: String, buildingID: String) {
         // check to see if the course already exists
         val courseDocRef = db.collection("courses").document(section)
         courseDocRef.get()
@@ -176,7 +177,7 @@ class AddVisitActivity : AppCompatActivity() {
                     )
 
                     // create a new course with a new student
-                    var c = Course(section, title, getDays())
+                    var c = Course(section, title, buildingID, getDays())
                     if (user.role == CoviderEnums.UserType.STUDENT) {
                         c.students.add(IdAndName(user.uid, user.name))
                     } else if (user.role == CoviderEnums.UserType.INSTRUCTOR) {

@@ -35,8 +35,6 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
     private val auth = Firebase.auth
 
     // member vars
-    private var favoriteBuildings = listOf<String>()
-
     var buildings = ArrayList<Building>()
     private var buildingMarkers = ArrayList<Marker>() // public so buildings can be accessed elsewhere
     private val priority1MinZoom = 16.5
@@ -64,9 +62,9 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
         map.setMinZoomPreference(14.0f)
 
         // Get favorite / recurring class buildings
-        getFavoriteBuildings(map) {
+        getFavoriteBuildings(map) { map, fav ->
             // Draw buildings on map
-            getAndDrawBuildings(map)
+            getAndDrawBuildings(map, fav)
         }
 
 
@@ -101,7 +99,8 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 
     // function to get favorite buildings so we know which ones to mark as yellow on map
     // with callback so we know when we can create the markers
-    private fun getFavoriteBuildings(map: GoogleMap, onSuccess: (GoogleMap) -> Unit) {
+    private fun getFavoriteBuildings(map: GoogleMap, onSuccess: (GoogleMap, List<String>) -> Unit) {
+
         // Firebase stuff to get favorite buildings
         val userID = auth.currentUser!!.uid
         val userRef = db.collection("users").document(userID)
@@ -109,10 +108,14 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
         userRef.get().addOnSuccessListener { result ->
             // Store favorite buildings in member var
             val userObj = result.toObject<User>()
-            favoriteBuildings = userObj!!.favoriteBuildings
+            val courses = userObj!!.courses
 
-            // Call callback function
-            onSuccess(map)
+            // Get buildings for those courses
+            getBuildingsForCourses(courses) { fav ->
+
+                // Call callback function
+                onSuccess(map, fav)
+            }
         }
     }
 
@@ -148,7 +151,7 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
     }
 
     // -- helper functions -- //
-    private fun getAndDrawBuildings(map: GoogleMap) {
+    private fun getAndDrawBuildings(map: GoogleMap, favoriteBuildings: List<String>) {
         if (buildingsLoaded) {
             drawBuildingMarkers(map)
         }
@@ -179,9 +182,26 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
                     Log.w(TAG(), "Error getting buildings.", exception)
                 }
         }
-
-
     }
+
+
+    // copied from buildingsActivity
+    private fun getBuildingsForCourses(courses: List<String>, callback: (buildings: List<String>) -> Unit) {
+        val courseDocsRef = db.collection("courses").whereIn("section", courses)
+        courseDocsRef.get().addOnSuccessListener { results ->
+            var favoriteBuildings = mutableListOf<String>()
+
+            // go through each document
+            for (doc in results) {
+                favoriteBuildings.add(doc["buildingID"] as String)
+            }
+
+            // now call callback with favoriteBuildings
+            callback(favoriteBuildings)
+        }
+    }
+
+
 
     private fun drawBuildingMarkers(map: GoogleMap) {
         // draw each building that has show as true

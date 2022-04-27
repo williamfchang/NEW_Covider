@@ -53,41 +53,60 @@ class BuildingsActivity : AppCompatActivity() {
             // otherwise, pull buildings from Firebase
             val userRef = db.collection("users").document(auth.currentUser!!.uid)
             userRef.get().addOnSuccessListener { userResult ->
-                val favoriteBuildings = userResult.toObject<User>()!!.favoriteBuildings
+                val courses = userResult.toObject<User>()!!.courses
 
-                db.collection("buildings").get()
-                    .addOnSuccessListener { result ->
-                        // loop through all building docs to create Building object
-                        for (doc in result) {
-                            val newBuilding = doc.toObject<Building>()
+                // get buildings for courses, then use callback to continue the logic
+                getBuildingsForCourses(courses) { favoriteBuildings ->
+                    db.collection("buildings").get()
+                        .addOnSuccessListener { result ->
+                            // loop through all building docs to create Building object
+                            for (doc in result) {
+                                val newBuilding = doc.toObject<Building>()
 
-                            // Check if this building is in favoriteBuildings
-                            if (favoriteBuildings.contains(newBuilding.id)) {
-                                newBuilding.priority = 3
+                                // Check if this building is in favoriteBuildings
+                                if (favoriteBuildings.contains(newBuilding.id)) {
+                                    newBuilding.priority = 3
+                                }
+
+                                buildings[doc.id] = newBuilding
                             }
 
-                            buildings[doc.id] = newBuilding
+                            buildingsLoaded = true
+                            Log.i(TAG(), "Successfully created ${buildings.size} buildings")
+
+                            // Get buildings by priority
+                            insertBuildingsByPriority()
+
+                            Log.i(TAG(), buildingsByPriority.toString())
+                            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, buildingsByPriority)
+                            listView.adapter = adapter
                         }
-
-                        buildingsLoaded = true
-                        Log.i(TAG(), "Successfully created ${buildings.size} buildings")
-
-                        // Get buildings by priority
-                        insertBuildingsByPriority()
-
-                        Log.i(TAG(), buildingsByPriority.toString())
-                        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, buildingsByPriority)
-                        listView.adapter = adapter
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.w(TAG(), "Error getting buildings.", exception)
-                    }
+                        .addOnFailureListener { exception ->
+                            Log.w(TAG(), "Error getting buildings.", exception)
+                        }
+                }
             }
 
 
 
         }
     }
+
+    private fun getBuildingsForCourses(courses: List<String>, callback: (buildings: List<String>) -> Unit) {
+        val courseDocsRef = db.collection("courses").whereIn("section", courses)
+        courseDocsRef.get().addOnSuccessListener { results ->
+            var favoriteBuildings = mutableListOf<String>()
+
+            // go through each document
+            for (doc in results) {
+                favoriteBuildings.add(doc["buildingID"] as String)
+            }
+
+            // now call callback with favoriteBuildings
+            callback(favoriteBuildings)
+        }
+    }
+
 
     // make function static
     companion object {
