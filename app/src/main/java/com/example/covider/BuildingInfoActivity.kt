@@ -3,13 +3,13 @@ package com.example.covider
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import com.example.covider.models.BuildingReport
 import com.example.covider.models.Visit
 import com.example.covider.visits.AddVisitActivity
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
@@ -46,69 +46,67 @@ class BuildingInfoActivity : AppCompatActivity() {
         buildingAddressText = findViewById(R.id.building_address_label)
         buildingAddressText.text = buildingAddress
         buildingRiskText = findViewById(R.id.risk_level_label)
-        buildingRiskText.text = getBuildingRisk()
+        getBuildingRisk(buildingID!!)
     }
 
-    private fun getBuildingRisk() : String {
+    private fun getBuildingRisk(buildingID: String) {
         var posRate = 0.0
         var avgMaskRate = 0.0
         var avgSanitizer = 0.0
         var posCases = 0.0
 
+        // only consider reports within last 3 days
+        val threeDaysBefore = Calendar.getInstance()
+        threeDaysBefore.add(Calendar.DAY_OF_YEAR, -3)
+
         // Find previous building health reports
         val buildingVisits = db.collection("visits")
-            .whereEqualTo("buildingID", buildingIDText.text)
+            .whereEqualTo("buildingID", buildingID)
+            .whereGreaterThanOrEqualTo("endTime", Timestamp(threeDaysBefore.time))
 
-        buildingVisits.get().addOnSuccessListener { result ->
-            var numVisits = 0.0
-            for (doc in result) {
-                val visit : Visit = doc.toObject()
-                // only consider visits within last 3 days
-                if (withinTimePeriod(visit.endTime!!)) {
-                    if(visit.userWasPositive) {
+        buildingVisits.get().addOnCompleteListener { it ->
+            if (it.isSuccessful) {
+                posCases = 0.0
+                var numVisits = 0.0
+                for (doc in it.result) {
+                    Log.i(TAG(),"visit logged")
+                    val visit: Visit = doc.toObject()
+                    if (visit.userWasPositive) {
+                        Log.i(TAG(),"visit positive")
                         posCases++
                     }
                     numVisits++
                 }
+                posRate = posCases / numVisits
+                updateText(calculateRisk(posRate, avgMaskRate, avgSanitizer, posCases))
             }
-            posRate = posCases/numVisits
-            buildingRiskText.text = getBuildingRisk()
         }
 
         // Find previous building reports
         val buildingReports = db.collection("buildingReports")
-            .whereEqualTo("buildingID", buildingIDText.text)
+            .whereEqualTo("buildingID", buildingID)
+            .whereGreaterThanOrEqualTo("date", Timestamp(threeDaysBefore.time))
 
-        buildingReports.get().addOnSuccessListener { result ->
-            var numReports= 0.0
-            var maskRate = 0.0
-            var sanitizer = 0.0
-            for (doc in result) {
-                val buildingR : BuildingReport = doc.toObject()
-                // only consider reports within last 3 days
-                if (withinTimePeriod(buildingR.date!!)) {
+        buildingReports.get().addOnCompleteListener { it ->
+            if (it.isSuccessful) {
+                var numReports = 0.0
+                var maskRate = 0.0
+                var sanitizer = 0.0
+                for (doc in it.result) {
+                    val buildingR: BuildingReport = doc.toObject()
                     maskRate += buildingR.maskPercentage!!
                     if (buildingR.sanitizer!!) {
                         sanitizer++
                     }
                     numReports++
                 }
+                avgMaskRate = maskRate / numReports
+                avgSanitizer = sanitizer / numReports
+                updateText(calculateRisk(posRate, avgMaskRate, avgSanitizer, posCases))
+            } else {
+                Log.i(TAG(),"buldng reports not workinig")
             }
-            avgMaskRate = maskRate/numReports
-            avgSanitizer = sanitizer/numReports
-            buildingRiskText.text = getBuildingRisk()
         }
-        return calculateRisk(posRate, avgMaskRate, avgSanitizer, posCases)
-    }
-
-    private fun withinTimePeriod(ts: Timestamp) : Boolean {
-        val threeDaysBefore = Calendar.getInstance()
-        threeDaysBefore.add(Calendar.DAY_OF_YEAR, -3)
-        // if report is within last three days
-        if (ts.compareTo(Timestamp(threeDaysBefore.time)) > 0){
-            return true
-        }
-        return false
     }
 
     private fun calculateRisk (posRate: Double, maskRate: Double, sanitizerRate: Double, posCases: Double) : String {
@@ -123,8 +121,12 @@ class BuildingInfoActivity : AppCompatActivity() {
         } else {
             string += "Low."
         }
-//        string += " There have been " + posCases.toInt() + " covid cases in the past 3 days."
+        string += " There have been " + posCases.toInt() + " covid cases in the past 3 days."
         return string
+    }
+
+    private fun updateText(text : String) {
+        buildingRiskText.text = text
     }
 }
 
