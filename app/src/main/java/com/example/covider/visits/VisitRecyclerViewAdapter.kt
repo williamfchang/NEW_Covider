@@ -24,7 +24,6 @@ class VisitRecyclerViewAdapter(
         val item = values[position]
         holder.idView.text = getTime(item.startTime!!) + "  to  " + getTime(item.endTime!!)
         holder.contentView.text = item.buildingID
-        // TODO: convert id to building name
     }
 
     override fun getItemCount(): Int = values.size
