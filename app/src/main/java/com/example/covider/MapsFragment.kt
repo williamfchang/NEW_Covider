@@ -186,18 +186,23 @@ class MapsFragment : Fragment(), GoogleMap.OnInfoWindowClickListener {
 
 
     // copied from buildingsActivity
-    private fun getBuildingsForCourses(courses: List<String>, callback: (buildings: List<String>) -> Unit) {
-        val courseDocsRef = db.collection("courses").whereIn("section", courses)
-        courseDocsRef.get().addOnSuccessListener { results ->
-            var favoriteBuildings = mutableListOf<String>()
+    private fun getBuildingsForCourses(courses: List<String>, callback: (buildings: List<String>) -> Unit){
+        if (courses.isNotEmpty()) {
+            val courseDocsRef = db.collection("courses").whereIn("section", courses)
+            courseDocsRef.get().addOnSuccessListener { results ->
+                var favoriteBuildings = mutableListOf<String>()
 
-            // go through each document
-            for (doc in results) {
-                favoriteBuildings.add(doc["buildingID"] as String)
+                // go through each document
+                for (doc in results) {
+                    favoriteBuildings.add(doc["buildingID"] as String)
+                }
+
+                // now call callback with favoriteBuildings
+                callback(favoriteBuildings)
             }
-
-            // now call callback with favoriteBuildings
-            callback(favoriteBuildings)
+        }
+        else{
+            callback(mutableListOf<String>())
         }
     }
 
