@@ -119,6 +119,16 @@ class MessagingService : FirebaseMessagingService(){
         db.collection("users").document(currUserID).update("token", s)
     }
 
+    public fun loadToken(){
+        Firebase.messaging.token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Log.i(TAG, "Saving user token to firebase")
+                val currUserID = auth.currentUser!!.uid
+                db.collection("users").document(currUserID).update("token", task.result)
+            }
+        }
+    }
+
     companion object {
         private const val TAG = "MessageService"
     }

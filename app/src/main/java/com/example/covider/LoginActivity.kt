@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import com.example.covider.services.MessagingService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -64,7 +65,10 @@ class LoginActivity : AppCompatActivity() {
         // successful login ends this activity, bringing the user back to the project activity
         // finish()
 
-        // temporarily go to main activity
+        // save the user token
+        val ms = MessagingService()
+        ms.loadToken()
+
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
     }
