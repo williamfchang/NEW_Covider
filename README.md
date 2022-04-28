@@ -17,3 +17,17 @@ Main navigation view: swap between Map, Visits, and Settings
 - Add Visit View: Takes in visit information (building code, start/end time, if visit is for a class, etc.) and creates a Visit. Opens back to main navigation view on completion
 - **From Settings tab**: Can view user profile information. Shows contact tracing notifications. Can open Health Report view
 - Health Report view: Attestation form to mark symptoms and indicate latest COVID test
+
+# Changes/Additions for 2.5 Sprint
+
+- Added building entry requirements
+- Added automatic logging of visits to recurring courses
+- Modified Course object to store meeting days, start/end time, and building code
+- Added and displayed calculation for building risk level
+- Implemented user survey for building safety protocols (when user visits a building), to include in risk level calculation
+- Modified map and building list view to prominently display the buildings for the courses the user is enrolled in
+- Added ability for instructors to change class mode
+- Added behavior where when an instructor tests positive, all courses they teach will automatically switch the class mode to online
+- Added push notifications that notify students when the class mode of a course they are enrolled in is changed
+- Added push notifications for close contacts
+- Changed profile navbar icon to proper image
