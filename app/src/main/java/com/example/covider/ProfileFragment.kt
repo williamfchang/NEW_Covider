@@ -352,10 +352,17 @@ class ProfileFragment : Fragment() {
                 callback(ArrayList<Visit>())
             }
             else {
+                // only do whereIn on up to 10 buildings
+                var tenRecentBuildings = recentBuildings.toList()
+                if (tenRecentBuildings.count() > 10) {
+                    tenRecentBuildings = tenRecentBuildings.slice(0..9)
+                }
+
+
                 val contactVisitsQuery = visitsRef
                     .whereEqualTo("userWasPositive", true)
                     .whereGreaterThanOrEqualTo("endTime", Timestamp(oneDayBefore.time))
-                    .whereIn("buildingID", recentBuildings.toList())
+                    .whereIn("buildingID", tenRecentBuildings)
 
                 // Pull these visits out and pass to display function
                 var contactVisits = ArrayList<Visit>()

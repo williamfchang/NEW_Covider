@@ -34,6 +34,7 @@ class VisitsFragment : Fragment() {
     private lateinit var addButton: Button
     private lateinit var listView: RecyclerView
     private var columnCount = 1
+    private var addedVisits : MutableList<Visit> = ArrayList()
     private var scheduledVisits : MutableList<Visit> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,7 +72,6 @@ class VisitsFragment : Fragment() {
 
         // get current user
         val uid = auth.currentUser!!.uid
-        val name = auth.currentUser!!.displayName!!
 
         // Find scheduled visits
         findScheduledVisits(uid)
@@ -83,15 +83,16 @@ class VisitsFragment : Fragment() {
 
         recentVisitsQuery.get()
             .addOnSuccessListener { result ->
-                // clear visit list first
-                VisitList.clearVisits()
+                // clear added visits
+                addedVisits.clear()
 
                 // fill in visit list
                 for (doc in result) {
-                    VisitList.addVisit(doc.toObject())
+                    addedVisits.add(doc.toObject())
                 }
 
-                // Add visits from scheduled classes
+                VisitList.clearVisits()
+                addAddedVisits()
                 addScheduledVisits()
 
                 listView.adapter!!.notifyDataSetChanged()
@@ -128,6 +129,12 @@ class VisitsFragment : Fragment() {
                 }
     }
 
+    private fun addAddedVisits() {
+        for(visit in addedVisits) {
+            VisitList.addVisit(visit)
+        }
+    }
+
     private fun addScheduledVisits() {
         for(visit in scheduledVisits) {
             VisitList.addVisit(visit)
@@ -138,26 +145,32 @@ class VisitsFragment : Fragment() {
         val userRef = db.collection("users").document(auth.currentUser!!.uid)
         userRef.get().addOnSuccessListener { userResult ->
             val courseNames = userResult.toObject<User>()!!.courses
-                getInfoForCourses(courseNames) { courses ->
-                    val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
-                    for (course in courses) {
-                        if (dayOfWeek <= 5 && course.days[dayOfWeek-1]) {
-                            val currCal = Calendar.getInstance()
 
-                            val startTime = Calendar.getInstance()
-                            startTime.setTime(course.startTime!!.toDate())
-                            startTime[Calendar.DAY_OF_YEAR] = currCal[Calendar.DAY_OF_YEAR]
+            getInfoForCourses(courseNames) { courses ->
+                val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
+                scheduledVisits.clear()
+                for (course in courses) {
+                    if (dayOfWeek >= Calendar.MONDAY && dayOfWeek <= Calendar.FRIDAY && course.days[dayOfWeek-2]) {
+                        val currCal = Calendar.getInstance()
 
-                            val endTime = Calendar.getInstance()
-                            endTime.setTime(course.endTime!!.toDate())
-                            endTime[Calendar.DAY_OF_YEAR] = currCal[Calendar.DAY_OF_YEAR]
+                        val startTime = Calendar.getInstance()
+                        startTime.setTime(course.startTime!!.toDate())
+                        startTime[Calendar.DAY_OF_YEAR] = currCal[Calendar.DAY_OF_YEAR]
 
-                            val visit = Visit(Timestamp(startTime.time), Timestamp(endTime.time), course.buildingID, uid, false, course.section)
-                            scheduledVisits.add(visit)
-                        }
+                        val endTime = Calendar.getInstance()
+                        endTime.setTime(course.endTime!!.toDate())
+                        endTime[Calendar.DAY_OF_YEAR] = currCal[Calendar.DAY_OF_YEAR]
+
+                        val visit = Visit(Timestamp(startTime.time), Timestamp(endTime.time), course.buildingID, uid, false, course.section)
+                        scheduledVisits.add(visit)
                     }
                 }
+                VisitList.clearVisits()
+                addScheduledVisits()
+                addAddedVisits()
+                listView.adapter!!.notifyDataSetChanged()
             }
+        }
     }
 
     private fun getInfoForCourses(courseNames: List<String>, callback: (courses: List<Course>) -> Unit) {
